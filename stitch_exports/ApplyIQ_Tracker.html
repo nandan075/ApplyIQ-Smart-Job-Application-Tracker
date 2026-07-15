@@ -1,0 +1,498 @@
+<!DOCTYPE html><html lang="en" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#39427d",
+                    "error-container": "#ffdad6",
+                    "on-background": "#0b1c30",
+                    "inverse-surface": "#213145",
+                    "surface-bright": "#f8f9ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface": "#f8f9ff",
+                    "secondary": "#4e5f7a",
+                    "tertiary-container": "#3e2900",
+                    "secondary-fixed": "#d4e3ff",
+                    "on-secondary-fixed": "#081c34",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#515a96",
+                    "tertiary-fixed": "#ffdeac",
+                    "primary-fixed-dim": "#bbc3ff",
+                    "surface-container-high": "#dce9ff",
+                    "on-primary-container": "#8790d0",
+                    "secondary-fixed-dim": "#b6c7e7",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "on-tertiary-fixed": "#281900",
+                    "on-tertiary-container": "#c48900",
+                    "on-secondary-container": "#50627d",
+                    "tertiary-fixed-dim": "#fdbb3e",
+                    "background": "#f8f9ff",
+                    "primary-container": "#1e2761",
+                    "on-secondary-fixed-variant": "#364861",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#bbc3ff",
+                    "on-tertiary-fixed-variant": "#5f4100",
+                    "surface-container-highest": "#d3e4fe",
+                    "primary-fixed": "#dfe0ff",
+                    "surface-dim": "#cbdbf5",
+                    "outline": "#767681",
+                    "on-surface-variant": "#464650",
+                    "secondary-container": "#ccdefe",
+                    "tertiary": "#231600",
+                    "on-surface": "#0b1c30",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "primary": "#06104c",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed": "#0a144f",
+                    "error": "#ba1a1a",
+                    "outline-variant": "#c6c5d1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "container-max": "1200px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "button": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-xl-mobile": [
+                            "Hanken Grotesk"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-md": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-xl": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-lg": [
+                            "Hanken Grotesk"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "button": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-xl-mobile": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "800"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-xl": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "800"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-background text-on-surface font-body-md h-screen flex overflow-hidden">
+<!-- SideNavBar (from JSON) -->
+<nav class="hidden lg:flex flex-col h-screen p-base w-64 border-r border-outline-variant dark:border-outline bg-surface-container-lowest dark:bg-inverse-surface shadow-md z-40 relative">
+<div class="px-4 py-6 mb-4">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">ApplyIQ</h1>
+<p class="text-secondary dark:text-secondary-fixed-dim text-sm mt-1">Career Assistant</p>
+</div>
+<!-- CTA -->
+<div class="px-4 mb-6">
+<button class="w-full bg-[#F2B134] text-primary hover:bg-tertiary-fixed-dim transition-colors py-3 rounded-lg font-button text-button shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+                New Application
+            </button>
+</div>
+<!-- Navigation Links -->
+<ul class="space-y-2 flex-grow">
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-primary-container transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary-fixed dark:bg-secondary-container text-on-secondary-fixed dark:text-on-secondary-container font-bold font-label-md text-label-md scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">view_kanban</span>
+                    Tracker
+                </a>
+</li>
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-primary-container transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">auto_fix_high</span>
+                    Optimizer
+                </a>
+</li>
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-primary-container transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">history</span>
+                    History
+                </a>
+</li>
+</ul>
+<!-- Footer Links -->
+<div class="mt-auto pt-6 border-t border-outline-variant dark:border-outline">
+<ul class="space-y-2">
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-primary-container transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">settings</span>
+                        Settings
+                    </a>
+</li>
+<li>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-primary-container transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">help_outline</span>
+                        Help
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar (Mobile only, simplified for this layout as-->
+<header class="lg:hidden flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50 bg-surface shadow-sm text-primary">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined">menu</span>
+<span class="text-headline-md font-headline-md font-extrabold text-primary">ApplyIQ</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">US</div>
+</div>
+</header>
+<!-- Notification Banner -->
+<div class="bg-surface-container-low border-b border-surface-variant flex-shrink-0">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin-desktop py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">campaign</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Follow-up Alert:</strong> No response from <span class="font-semibold text-primary">Nova</span> in 7 days. Draft a check-in?
+                    </p>
+</div>
+<button class="whitespace-nowrap px-4 py-2 bg-white border border-primary text-primary rounded-lg font-button text-[14px] hover:bg-surface-container-lowest transition-colors shadow-sm">
+                    Draft Message
+                </button>
+</div>
+</div>
+<!-- Page Header -->
+<div class="flex-shrink-0 px-margin-mobile lg:px-margin-desktop py-6 lg:py-8 max-w-[1200px] mx-auto w-full">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-xl-mobile lg:font-headline-xl text-headline-xl-mobile lg:text-headline-xl text-on-surface mb-2">Application Tracker</h2>
+<p class="font-body-md text-body-md text-secondary">Drag and drop to update status.</p>
+</div>
+<div class="flex items-center gap-3 hidden sm:flex">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
+<input type="text" placeholder="Search roles..." class="pl-10 pr-4 py-2 border border-outline-variant rounded-lg bg-surface focus:border-primary focus:ring-1 focus:ring-primary w-64 text-sm outline-none transition-all">
+</div>
+<button class="w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-secondary hover:bg-surface-container-low hover:text-primary transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Kanban Board Area -->
+<div class="flex-grow overflow-x-auto overflow-y-hidden px-margin-mobile lg:px-margin-desktop pb-8 custom-scrollbar">
+<div class="flex gap-6 h-full min-w-max pb-4">
+<!-- Column: Saved -->
+<div class="w-[320px] flex flex-col h-full bg-surface-bright rounded-xl border border-surface-variant p-4">
+<div class="flex justify-between items-center mb-4 px-2">
+<h3 class="font-headline-md text-[18px] font-bold text-on-surface flex items-center gap-2">
+                            Saved <span class="bg-surface-container px-2 py-0.5 rounded-full text-xs text-secondary font-medium">3</span>
+</h3>
+<button class="text-secondary hover:text-primary"><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+<div class="kanban-column-content flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar pb-10">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow card-hover-shadow cursor-pointer relative group">
+<div class="absolute top-4 right-4 text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity drag-handle">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist logo for a tech company called 'Stripe', featuring geometric shapes in deep blue and purple on a white background, highly polished corporate identity design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxyyi8L6dQtRnJfKW_WZocj8vsIgOTUchN-DDvut7kZSG6AVfxVIr8R2WUidT12CsuzMz62j4qBjE5iPp6E8TBKyP_U__tHeDruHIIL-JCSPe_uG046TOUCedlci7ITflAuDsunO6d2LlqN197UtmWahHnrWHRCWfUdFTAq8z7oopUJZ2n4LVJkV18W702wCe8vg3r3JyutAqEdWxwcHO8zs5RmB6B0zV7kItq1HInMEi_ngGl6GLZ0Q">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6">Frontend Engineer</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Stripe</p>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-md text-[12px]">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                    92% Match
+                                </span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container text-secondary font-label-md text-[12px]">
+                                    Remote
+                                </span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<div class="flex items-center gap-1 text-secondary text-[12px]">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>Added 2d ago</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-surface-container-high text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[14px]">bookmark</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow card-hover-shadow cursor-pointer relative group">
+<div class="absolute top-4 right-4 text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity drag-handle">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A modern corporate logo for 'Airbnb', simple abstract icon in pinkish-red on a crisp white background, premium minimalist design style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe9dyCJYNKo0rFGyckVROdP9bk9VcOVVKHo7WOqTJFI8LI-zYpa_ix8_6RjLfKQEYLU8AgtjRiht4ssJdxOIfwWx3bgZ7KXhjZSMb8bmqGTk2uEcpt9w4gPlGQ8FnYXj5LeAiYpHNnKmL6DdxYk0T68dDKhAqgFiwQ-PIAtnTJbJrlUiXo9NT_-_722FR4RFr5yoVMQCK-9rrCJ_4PPQ0Ujs_z9wMQbNhn8K8l1XnhJGze9C-HsQwH5Q">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6">UX Designer</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Airbnb</p>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container text-secondary font-label-md text-[12px]">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                    78% Match
+                                </span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<div class="flex items-center gap-1 text-error text-[12px] font-medium">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span>Closes Tomorrow</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Applied -->
+<div class="w-[320px] flex flex-col h-full bg-surface-bright rounded-xl border border-surface-variant p-4">
+<div class="flex justify-between items-center mb-4 px-2">
+<h3 class="font-headline-md text-[18px] font-bold text-on-surface flex items-center gap-2">
+                            Applied <span class="bg-surface-container px-2 py-0.5 rounded-full text-xs text-secondary font-medium">2</span>
+</h3>
+</div>
+<div class="kanban-column-content flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar pb-10">
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow card-hover-shadow cursor-pointer relative group">
+<div class="absolute top-4 right-4 text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity drag-handle">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sleek corporate logo for 'Nova', dark navy blue typography with a subtle amber accent line, professional modern tech company aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhEtS8sYTFl3jubqpCtoLvozwggpyMj4HrG1sejrrK-l3HAngUvLeJdVDnbjtbkyXOlrjVquKKOOIZe0QAR8J6cN4KvhqrCkLYDMa7HgixS1itd7sNrowyiGeKE9VPsgncj7WtYkij3O-QNO-PQvpXwiuz19dqxAeyC1usU13GfaC5pQUuopScFY6J_3uE3G9YB8ZmqFwUlE5bKBCqrisGtb0riyDxZYec3sb1zQl72fIbAxz28-GzeA">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6">Product Manager</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Nova</p>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-md text-[12px]">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                    88% Match
+                                </span>
+</div>
+<div class="p-2 mb-3 bg-error-container/50 rounded-lg border border-error-container text-error text-[12px] flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+<span>Waiting 7 days. Consider a follow-up.</span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<div class="flex items-center gap-1 text-secondary text-[12px]">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span>Oct 12, 2023</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow card-hover-shadow cursor-pointer relative group border border-primary/20">
+<div class="absolute top-4 right-4 text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity drag-handle">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A vibrant startup logo for 'Figma', colorful geometric shapes arranged playfully on a clean white background, high-end digital design tool branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmxqZgx3omu89IM_i-kbO2uwK4-7xK0u1tBDrOakaOPQH4gVE_hooj7yCgdTZr9iHaJy-hTBRYBQt2J7wL6LtDdaO0rm5BqSzGP01IzsXEsLf_P4vMQZOciq2L5OpVHqa8GWeNTs4eFFntrxzOKTKPstVqO6ow1m_-cc4lrZ2og7axRluLAHBgqnwABKGy2_N5rjy0O9PldpMqQeVSzLvuhpw8YFgDntdm_wDYfTVLZqNUdQbrNjSPag">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6">UI Engineer</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Figma</p>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-md text-[12px]">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                    95% Match
+                                </span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<div class="flex items-center gap-1 text-secondary text-[12px]">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span>Oct 18, 2023</span>
+</div>
+<span class="text-[11px] font-medium text-primary bg-primary-container/20 px-2 py-0.5 rounded">Viewed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Interviewing -->
+<div class="w-[320px] flex flex-col h-full bg-surface-bright rounded-xl border border-surface-variant p-4">
+<div class="flex justify-between items-center mb-4 px-2">
+<h3 class="font-headline-md text-[18px] font-bold text-on-surface flex items-center gap-2">
+                            Interviewing <span class="bg-surface-container px-2 py-0.5 rounded-full text-xs text-secondary font-medium">1</span>
+</h3>
+</div>
+<div class="kanban-column-content flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar pb-10">
+<!-- Card 5 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow card-hover-shadow cursor-pointer relative group border-l-4 border-l-[#F2B134]">
+<div class="absolute top-4 right-4 text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity drag-handle">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A modern tech logo for 'Spotify', bold green abstract acoustic waves on a dark charcoal background, premium streaming service identity design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwDNHTfNuyi4cYE6vHG50XD6oZH5IVvxaq0yPmZqNENk9mLAX5fi9ftUeyXPttZzZsmx2oLSrvSeYtNESmHYwRSDJsKC9uySiE6_tWe3kN_nq1sIt6BTF_wch_Bqh-C_nedhOclOzRmzjV5dbUzQ41h5Hjx1uraiDcdTg4s2ln1I8rYa80XEelIm9O6iTjYYRuWOt_k2_CVtixWpU75-_ZVpcLCTRXH11hFxCFZZubSNgFUS7QtuzV_A">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6">Senior Designer</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Spotify</p>
+</div>
+</div>
+<div class="bg-[#F2B134]/10 rounded-lg p-3 mb-4 border border-[#F2B134]/30">
+<div class="flex items-center gap-2 text-on-surface font-bold text-[13px] mb-1">
+<span class="material-symbols-outlined text-[16px] text-[#c48900]">event</span>
+                                    Technical Round
+                                </div>
+<div class="text-[12px] text-secondary ml-6">Tomorrow, 2:00 PM EST</div>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-md text-[12px]">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                    89% Match
+                                </span>
+<button class="text-primary hover:text-primary-fixed-dim text-[12px] font-bold">Prep Notes</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Offers/Rejected -->
+<div class="w-[320px] flex flex-col h-full bg-surface-bright rounded-xl border border-surface-variant p-4">
+<div class="flex justify-between items-center mb-4 px-2">
+<h3 class="font-headline-md text-[18px] font-bold text-on-surface flex items-center gap-2">
+                            Offers / Done <span class="bg-surface-container px-2 py-0.5 rounded-full text-xs text-secondary font-medium">1</span>
+</h3>
+</div>
+<div class="kanban-column-content flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar pb-10">
+<!-- Card 6 -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 card-shadow opacity-75 cursor-pointer relative group">
+<div class="flex items-start gap-3 mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 overflow-hidden grayscale">
+<img class="w-full h-full object-cover" data-alt="A classic corporate logo for a large bank, simple bold typography with a minimal icon, monochromatic grey scale, subdued professional design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdOcPNpy08xO6BoOQJZpSH0qnfMoZ05alsO-Dx2_Z2LM6nilYsdyYKv9NJImyR4quERyzaMoQX-7sTED-n034g1bgsGnvsjX25xK0zOklpmQP_gUl9kiZBiSlZ6W0BhuZJihvz5pDve1ivIgkYVIqEpzUsJZwHhoz15GEbzEjsjUlzm7h4qk4H1cWsiiYzaqUG6PRC6b8SeSMdrMEAdC_-XjieC6exOit32bFKktQNEOY2UC3efPf9gw">
+</div>
+<div>
+<h4 class="font-headline-md text-[16px] font-bold text-on-surface leading-tight pr-6 line-through text-secondary">UX Researcher</h4>
+<p class="font-body-md text-[14px] text-secondary mt-0.5">Capital One</p>
+</div>
+</div>
+<div class="mt-2 mb-4">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-surface-variant text-on-surface-variant font-label-md text-[12px]">
+                                    Rejected
+                                </span>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<div class="flex items-center gap-1 text-secondary text-[12px]">
+<span>Closed Oct 05</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<style>
+        /* Custom scrollbar for Kanban board to look clean */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d3e4fe; 
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #8790d0; 
+        }
+    </style>
+</body></html>

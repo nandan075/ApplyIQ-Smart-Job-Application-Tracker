@@ -1,0 +1,374 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@700;800&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script id="tailwind-config">try{
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#39427d",
+                      "error-container": "#ffdad6",
+                      "on-background": "#0b1c30",
+                      "inverse-surface": "#213145",
+                      "surface-bright": "#f8f9ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface": "#f8f9ff",
+                      "secondary": "#4e5f7a",
+                      "tertiary-container": "#3e2900",
+                      "secondary-fixed": "#d4e3ff",
+                      "on-secondary-fixed": "#081c34",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-tint": "#515a96",
+                      "tertiary-fixed": "#ffdeac",
+                      "primary-fixed-dim": "#bbc3ff",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-container": "#8790d0",
+                      "secondary-fixed-dim": "#b6c7e7",
+                      "on-error": "#ffffff",
+                      "surface-container-low": "#eff4ff",
+                      "on-tertiary-fixed": "#281900",
+                      "on-tertiary-container": "#c48900",
+                      "on-secondary-container": "#50627d",
+                      "tertiary-fixed-dim": "#fdbb3e",
+                      "background": "#f8f9ff",
+                      "primary-container": "#1e2761",
+                      "on-secondary-fixed-variant": "#364861",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#bbc3ff",
+                      "on-tertiary-fixed-variant": "#5f4100",
+                      "surface-container-highest": "#d3e4fe",
+                      "primary-fixed": "#dfe0ff",
+                      "surface-dim": "#cbdbf5",
+                      "outline": "#767681",
+                      "on-surface-variant": "#464650",
+                      "secondary-container": "#ccdefe",
+                      "tertiary": "#231600",
+                      "on-surface": "#0b1c30",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "primary": "#06104c",
+                      "on-error-container": "#93000a",
+                      "surface-container": "#e5eeff",
+                      "on-primary-fixed": "#0a144f",
+                      "error": "#ba1a1a",
+                      "outline-variant": "#c6c5d1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "base": "8px",
+                      "margin-desktop": "40px",
+                      "gutter": "24px",
+                      "container-max": "1200px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "button": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-xl-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-xl": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "button": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-xl-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-xl": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      }catch(_e){}</script><meta charset="utf-8"></head><body class="font-body-md text-on-background flex min-h-screen selection:bg-tertiary-fixed-dim selection:text-on-tertiary-container">
+<!-- SideNavBar -->
+<nav class="hidden lg:flex flex-col h-screen p-base w-64 border-r border-outline-variant bg-surface-container-lowest shadow-md fixed left-0 top-0 z-40">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-4 py-6 mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm">
+                AIQ
+            </div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">ApplyIQ</h1>
+<p class="font-label-md text-label-md text-secondary">Career Assistant</p>
+</div>
+</div>
+<!-- Primary CTA -->
+<div class="px-4 mb-8">
+<button class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-button text-button py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-90">add</span>
+                New Application
+            </button>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 space-y-2 px-2">
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary hover:bg-surface-container-high hover:text-primary transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary hover:bg-surface-container-high hover:text-primary transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">view_kanban</span>
+<span class="font-label-md text-label-md">Tracker</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary-fixed text-on-secondary-fixed font-bold translate-x-1 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
+<span class="font-label-md text-label-md">Relevance</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary hover:bg-surface-container-high hover:text-primary transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="font-label-md text-label-md">History</span>
+</a>
+</div>
+<!-- Footer Navigation -->
+<div class="mt-auto space-y-2 px-2 pt-6 border-t border-outline-variant">
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-secondary hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help_outline</span>
+<span class="font-label-md text-label-md">Help</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 lg:ml-64 bg-background min-h-screen pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-30 bg-surface/80 backdrop-blur-md px-margin-mobile md:px-margin-desktop py-6 flex justify-between items-end border-b border-surface-variant">
+<div>
+<div class="flex items-center gap-2 text-secondary font-label-md text-label-md mb-2">
+<a href="#" class="hover:text-primary">Dashboard</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Relevance Checker</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg md:font-headline-xl md:text-headline-xl text-primary">Relevance Checker</h1>
+</div>
+<!-- Mobile Menu Toggle (Visible only on small screens) -->
+<button class="lg:hidden w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<div class="max-w-[container-max] mx-auto px-margin-mobile md:px-margin-desktop py-12 space-y-12">
+<!-- Top Section: Inputs -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Left Panel: Upload Resume -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-level-1 flex flex-col h-full border border-transparent hover:border-primary/20 transition-colors">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary">Your Resume</h2>
+</div>
+<div class="flex-1 border-2 border-dashed border-outline-variant rounded-lg bg-surface flex flex-col items-center justify-center p-8 text-center hover:border-primary hover:bg-surface-container-low transition-all cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-primary mb-4 group-hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-3xl">upload_file</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2">Drag &amp; Drop Resume</h3>
+<p class="font-body-md text-body-md text-secondary text-sm">Supports PDF, DOCX, TXT (Max 5MB)</p>
+<button class="mt-6 px-6 py-2 rounded-full border border-primary text-primary font-button text-sm hover:bg-primary hover:text-on-primary transition-colors">
+                            Browse Files
+                        </button>
+</div>
+</div>
+<!-- Right-->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-level-1 flex flex-col h-full border border-transparent hover:border-primary/20 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">work</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary">Job Description</h2>
+</div>
+<div class="flex-1 flex flex-col">
+<label for="job-desc" class="sr-only">Paste Job Description</label>
+<textarea id="job-desc" class="flex-1 w-full bg-surface border border-outline-variant rounded-lg p-4 font-body-md text-body-md text-on-surface resize-none focus:border-primary focus:ring-0 placeholder:text-secondary/60" placeholder="Paste the full job description here to analyze relevance..."></textarea>
+</div>
+</div>
+</section>
+<!-- Results Section (Simulated Active State) -->
+<section class="bg-surface-container-lowest rounded-2xl p-8 shadow-level-1 relative overflow-hidden">
+<!-- Subtle background decoration -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Focal Point: Circular Gauge -->
+<div class="lg:w-1/3 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-outline-variant/30 pb-10 lg:pb-0 lg:pr-10 relative z-10">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-8">Relevance Score</h3>
+<div class="relative w-48 h-48 flex items-center justify-center">
+<!-- Background Circle -->
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="45" fill="none" stroke="#eff4ff" stroke-width="8"></circle>
+<!-- Progress Circle (72%) -->
+<circle class="gauge-circle" cx="50" cy="50" r="45" fill="none" stroke="#fdbb3e" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+</svg>
+<!-- Inner Score -->
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-headline-xl text-headline-xl text-primary leading-none">72</span>
+<span class="font-label-md text-label-md text-secondary mt-1">/ 100</span>
+</div>
+</div>
+<div class="mt-8 flex gap-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-sm">
+                                Good Match
+                            </span>
+</div>
+</div>
+<!-- Side-by-side Details -->
+<div class="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+<!-- Matched Strengths -->
+<div class="space-y-4">
+<h4 class="font-headline-md text-lg text-primary flex items-center gap-2 border-b border-surface-variant pb-2">
+<span class="material-symbols-outlined text-[#059669]">check_circle</span>
+                                Matched Strengths
+                            </h4>
+<ul class="space-y-3 font-body-md text-body-md text-on-surface">
+<li class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[#059669] text-[20px] mt-0.5">task_alt</span>
+<span>5+ years of React/Node.js experience strongly aligned.</span>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[#059669] text-[20px] mt-0.5">task_alt</span>
+<span>Leadership and agile mentoring clearly demonstrated.</span>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[#059669] text-[20px] mt-0.5">task_alt</span>
+<span>Cloud infrastructure (AWS) keywords match exactly.</span>
+</li>
+</ul>
+</div>
+<!-- Drawbacks / Gaps -->
+<div class="space-y-4">
+<h4 class="font-headline-md text-lg text-on-tertiary-container flex items-center gap-2 border-b border-surface-variant pb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">warning</span>
+                                Drawbacks &amp; Gaps
+                            </h4>
+<ul class="space-y-3 font-body-md text-body-md text-on-surface">
+<li class="flex items-start gap-3 p-3 rounded-lg bg-[#fffbeb] border border-[#fef3c7]">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[20px] mt-0.5">error</span>
+<span>Missing specific mentions of 'GraphQL' APIs.</span>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-lg bg-[#fffbeb] border border-[#fef3c7]">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[20px] mt-0.5">error</span>
+<span>'Performance optimization' metrics are vaguely stated.</span>
+</li>
+</ul>
+</div>
+<!-- Actionable Suggestions -->
+<div class="md:col-span-2 mt-4 bg-surface rounded-xl p-6 border border-outline-variant/50">
+<h4 class="font-headline-md text-lg text-primary flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+                                Actionable Suggestions
+                            </h4>
+<ul class="grid grid-cols-1 md:grid-cols-2 gap-4 font-body-md text-body-md text-secondary">
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span>Add quantifiable results to your last two roles (e.g., 'reduced load time by 20%').</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span>Explicitly list GraphQL if you have experience with it, as it's a primary requirement.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span>Reframe your 'Team Lead' title to highlight architectural decision-making.</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Primary CTA -->
+<div class="mt-12 flex justify-end pt-6 border-t border-outline-variant/30">
+<button class="bg-[#F2B134] hover:bg-[#d99f2e] text-[#081c34] font-button text-button py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 transform hover:-translate-y-0.5">
+<span class="material-symbols-outlined text-[20px]">magic_button</span>
+                        Generate Tailored Resume
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<script>
+        // Simple animation for the gauge on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const gauge = document.querySelector('.gauge-circle');
+                if(gauge) {
+                    // Circumference is ~283. (283 * (1 - 0.72)) = 79.24
+                    gauge.style.strokeDashoffset = '79.24';
+                }
+            }, 300);
+        });
+    </script>
+</body></html>
