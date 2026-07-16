@@ -6,6 +6,10 @@ import {
   tailorApplication,
   updateApplicationStatus,
   uploadResume,
+  getCurrentUser,
+  signIn,
+  signOut,
+  updateCurrentUser,
 } from "./api.js";
 import Icon from "./components/Icon.jsx";
 import JDInput from "./components/JDInput.jsx";
@@ -13,15 +17,17 @@ import MatchDashboard from "./components/MatchDashboard.jsx";
 import ResumeUpload from "./components/ResumeUpload.jsx";
 import TailorWorkspace from "./components/TailorWorkspace.jsx";
 import TrackerBoard from "./components/TrackerBoard.jsx";
+import { HelpPage, ProfilePage, SettingsPage, SignInPage } from "./components/AccountPages.jsx";
 
 const pages = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" },
   { id: "relevance", label: "Relevance", icon: "checkCircle" },
   { id: "tailoring", label: "Tailoring", icon: "wand" },
   { id: "tracker", label: "Tracker", icon: "clipboard" },
+  { id: "profile", label: "Profile", icon: "edit" },
 ];
 
-function Shell({ activePage, setActivePage, openQuickAdd, error, clearError, statusText, children }) {
+function Shell({ activePage, setActivePage, openQuickAdd, error, clearError, statusText, onLogout, children }) {
   return (
     <div className="app-shell">
       <aside className="side-nav">
@@ -38,8 +44,9 @@ function Shell({ activePage, setActivePage, openQuickAdd, error, clearError, sta
           ))}
         </nav>
         <div className="nav-footer">
-          <button><Icon name="settings" />Settings</button>
-          <button><Icon name="help" />Help</button>
+          <button onClick={() => setActivePage("settings")}><Icon name="settings" />Settings</button>
+          <button onClick={() => setActivePage("help")}><Icon name="help" />Help</button>
+          <button onClick={onLogout}><Icon name="x" />Sign out</button>
         </div>
       </aside>
       <main className="main-area">
@@ -128,6 +135,8 @@ function QuickAddModal({ open, onClose, onSubmit, loading }) {
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [jd, setJd] = useState("We need a senior frontend engineer with React, Node.js, AWS, mentoring, GraphQL APIs, and measurable product impact.");
   const [applications, setApplications] = useState([]);
@@ -149,8 +158,13 @@ export default function App() {
   }
 
   useEffect(() => {
-    refreshApplications().catch((err) => setError(err.message)).finally(() => setPending((p) => ({ ...p, initial: false })));
+    getCurrentUser().then(setUser).catch((err) => { if (err.status !== 401) setError(err.message); }).finally(() => setAuthReady(true));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    refreshApplications().catch((err) => setError(err.message)).finally(() => setPending((p) => ({ ...p, initial: false })));
+  }, [user]);
 
   async function run(key, action) {
     setError("");
@@ -165,6 +179,21 @@ export default function App() {
     }
   }
 
+  async function handleSignIn(email, password) {
+    setError("");
+    try { setUser(await signIn(email, password)); } catch (err) { setError(err.message); throw err; }
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    setUser(null);
+    setApplications([]);
+    setActivePage("dashboard");
+  }
+
+  async function handleProfileSave(profile) {
+    try { setUser(await updateCurrentUser(profile)); setActivePage("profile"); } catch (err) { setError(err.message); throw err; }
+  }
   async function handleUploadResume(file) {
     await run("upload", () => uploadResume(file));
   }
@@ -208,10 +237,16 @@ export default function App() {
     activePage === "dashboard" ? <Dashboard applications={applications} scores={scores} loading={pending.initial} openQuickAdd={() => setModalOpen(true)} setActivePage={setActivePage} /> :
     activePage === "tailoring" ? <TailorWorkspace application={selectedApplication} tailoredDoc={selectedTailoredDoc} loading={pending.tailor} onTailor={handleTailor} score={selectedScore?.relevance_score || 87} /> :
     activePage === "tracker" ? <TrackerBoard applications={applications} scores={scores} loading={pending.initial} pendingStatusId={pending.statusId} onStatusChange={handleStatusChange} /> :
+    activePage === "profile" ? <ProfilePage user={user} openSettings={() => setActivePage("settings")} /> :
+    activePage === "settings" ? <SettingsPage user={user} onSave={handleProfileSave} /> :
+    activePage === "help" ? <HelpPage /> :
     <RelevanceChecker jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
+  if (!authReady) return null;
+  if (!user) return <SignInPage onSignIn={handleSignIn} error={error} />;
+
   return (
-    <Shell activePage={activePage} setActivePage={setActivePage} openQuickAdd={() => setModalOpen(true)} error={error} clearError={() => setError("")} statusText={statusText}>
+    <Shell activePage={activePage} setActivePage={setActivePage} openQuickAdd={() => setModalOpen(true)} error={error} clearError={() => setError("")} statusText={statusText} onLogout={handleSignOut}>
       {screen}
       <QuickAddModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={analyzeText} loading={pending.create || pending.score} />
     </Shell>

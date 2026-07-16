@@ -1,0 +1,32 @@
+import { useEffect, useState } from "react";
+import Icon from "./Icon.jsx";
+
+export function SignInPage({ onSignIn, error }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    setPending(true);
+    try { await onSignIn(email, password); } finally { setPending(false); }
+  }
+
+  return <main className="auth-page"><form className="auth-form" onSubmit={submit}><div className="brand-block"><div className="brand-mark">AIQ</div><div><h1>ApplyIQ</h1><p>Career Assistant</p></div></div><h2>Sign in</h2><p>Continue to your application workspace.</p>{error && <p className="auth-error">{error}</p>}<label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength="8" autoComplete="current-password" /></label><button className="gold-button" disabled={pending}>{pending ? <Icon name="loader" className="spin" /> : <Icon name="applied" />}Sign in</button></form></main>;
+}
+
+export function ProfilePage({ user, openSettings }) {
+  return <div className="page account-page"><div className="page-title-row"><div><p className="eyebrow">Account</p><h2>Profile</h2></div><button className="gold-button" onClick={openSettings}><Icon name="edit" />Edit profile</button></div><section className="panel profile-summary"><div className="profile-initial">{(user.name || user.email).slice(0, 1).toUpperCase()}</div><div><h3>{user.name || "ApplyIQ user"}</h3><p>{user.job_title || "Career candidate"}</p><p>{user.email}</p>{user.bio && <p>{user.bio}</p>}</div></section></div>;
+}
+
+export function SettingsPage({ user, onSave }) {
+  const [form, setForm] = useState(user);
+  const [pending, setPending] = useState(false);
+  useEffect(() => setForm(user), [user]);
+  async function submit(event) { event.preventDefault(); setPending(true); try { await onSave(form); } finally { setPending(false); } }
+  return <div className="page account-page"><div className="page-title-row"><div><p className="eyebrow">Account</p><h2>Settings</h2></div></div><form className="panel settings-form" onSubmit={submit}><label>Name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label><label>Email<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /></label><label>Job title<input value={form.job_title} onChange={(event) => setForm({ ...form, job_title: event.target.value })} /></label><label>About<textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></label><button className="gold-button" disabled={pending}>{pending ? "Saving..." : "Save changes"}</button></form></div>;
+}
+
+export function HelpPage() {
+  return <div className="page account-page"><div className="page-title-row"><div><p className="eyebrow">Support</p><h2>Help</h2></div></div><section className="panel help-list"><h3>Getting started</h3><p>Add a job, upload a resume, then use Relevance Checker to assess the fit.</p><h3>Need help?</h3><p>Contact your ApplyIQ workspace administrator for account and application support.</p></section></div>;
+}
