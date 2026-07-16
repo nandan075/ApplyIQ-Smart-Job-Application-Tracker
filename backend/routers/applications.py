@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.auth import get_current_user
 from backend.database import get_db
 from backend.models import Application, Resume, Score, TailoredDoc, User
 from backend.tailoring import TailoredAssets, tailor_with_openai
@@ -55,7 +56,6 @@ class ScoreResponse(ScoreAssets):
 
 class ApplicationResponse(BaseModel):
     id: UUID
-    user_id: UUID
     company: str
     role: str
     jd_text: str
@@ -72,52 +72,41 @@ class TailoredDocResponse(TailoredAssets):
 
 def score_with_openai(resume_data: dict, jd_text: str) -> ScoreAssets:
     client = OpenAI()
-    response = client.responses.parse(
+    response = client.beta.chat.completions.parse(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        input=[
+        messages=[
             {
                 "role": "system",
                 "content": "Score resume fit for the job description. Use only evidence present in the resume JSON.",
             },
             {"role": "user", "content": f"Resume JSON:\n{resume_data}\n\nJob description:\n{jd_text[:50000]}"},
         ],
-        text_format=ScoreAssets,
+        response_format=ScoreAssets,
     )
-    return response.output_parsed
+    return response.choices[0].message.parsed
 
 
 def extract_job_info_with_openai(jd_text: str) -> ExtractedJobInfo:
     client = OpenAI()
-    response = client.responses.parse(
+    response = client.beta.chat.completions.parse(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        input=[
+        messages=[
             {
                 "role": "system",
                 "content": f"{JD_EXTRACTION_PROMPT}\nCurrent date: {date.today().isoformat()}",
             },
             {"role": "user", "content": jd_text[:50000]},
         ],
-        text_format=ExtractedJobInfo,
+        response_format=ExtractedJobInfo,
     )
-    return response.output_parsed
+    return response.choices[0].message.parsed
 
 
-async def get_or_create_test_user(db: AsyncSession) -> User:
-    email = "test@example.com"
-    user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
-    if user:
-        return user
-
-    user = User(email=email)
-    db.add(user)
-    await db.flush()
-    return user
 
 
 def application_to_response(application: Application) -> ApplicationResponse:
     return ApplicationResponse(
         id=application.id,
-        user_id=application.user_id,
         company=application.company,
         role=application.role,
         jd_text=application.jd_text,
@@ -160,8 +149,8 @@ async def get_latest_resume(db: AsyncSession, user_id: UUID) -> Resume | None:
 
 
 @router.get("", response_model=list[ApplicationResponse])
-async def list_applications(db: AsyncSession = Depends(get_db)) -> list[ApplicationResponse]:
-    applications = (await db.execute(select(Application).order_by(Application.created_at.desc()))).scalars().all()
+async def list_applications(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> list[ApplicationResponse]:
+    applications = (await db.execute(select(Application).where(Application.user_id == user.id).order_by(Application.created_at.desc()))).scalars().all()
     return [application_to_response(application) for application in applications]
 
 
@@ -169,6 +158,7 @@ async def list_applications(db: AsyncSession = Depends(get_db)) -> list[Applicat
 async def create_application(
     payload: ApplicationCreate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> ApplicationResponse:
     company = payload.company.strip() if payload.company else None
     role = payload.role.strip() if payload.role else None
@@ -192,7 +182,6 @@ async def create_application(
     if not company or not role:
         raise HTTPException(status_code=422, detail="Company and role are required or must be extractable from jd_text.")
 
-    user = await get_or_create_test_user(db)
     application = Application(
         user_id=user.id,
         company=company,
@@ -212,9 +201,10 @@ async def update_application_status(
     application_id: UUID,
     payload: ApplicationStatusUpdate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> ApplicationResponse:
     application = (
-        await db.execute(select(Application).where(Application.id == application_id))
+        await db.execute(select(Application).where(Application.id == application_id, Application.user_id == user.id))
     ).scalar_one_or_none()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found.")
@@ -229,9 +219,10 @@ async def update_application_status(
 async def score_application(
     application_id: UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> ScoreResponse:
     application = (
-        await db.execute(select(Application).where(Application.id == application_id))
+        await db.execute(select(Application).where(Application.id == application_id, Application.user_id == user.id))
     ).scalar_one_or_none()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found.")
@@ -325,9 +316,10 @@ def build_export_markdown(
 async def export_application(
     application_id: UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> Response:
     application = (
-        await db.execute(select(Application).where(Application.id == application_id))
+        await db.execute(select(Application).where(Application.id == application_id, Application.user_id == user.id))
     ).scalar_one_or_none()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found.")
@@ -352,9 +344,10 @@ async def export_application(
 async def tailor_application(
     application_id: UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> TailoredDocResponse:
     application = (
-        await db.execute(select(Application).where(Application.id == application_id))
+        await db.execute(select(Application).where(Application.id == application_id, Application.user_id == user.id))
     ).scalar_one_or_none()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found.")

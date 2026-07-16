@@ -43,9 +43,9 @@ def build_tailor_input(resume_data: dict, jd_text: str) -> list[dict[str, str]]:
 
 def tailor_with_openai(resume_data: dict, jd_text: str) -> TailoredAssets:
     client = OpenAI()
-    response = client.responses.parse(
+    response = client.beta.chat.completions.parse(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        input=build_tailor_input(resume_data, jd_text),
-        text_format=TailoredAssets,
+        messages=build_tailor_input(resume_data, jd_text),
+        response_format=TailoredAssets,
     )
-    return response.output_parsed
+    return response.choices[0].message.parsed

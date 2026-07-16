@@ -10,3 +10,4 @@ openai
 pdfplumber
 python-docx
 python-multipart
+itsdangerous

@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.auth import get_current_user
 from backend.database import get_db
 from backend.models import Resume, User
 
@@ -73,36 +74,25 @@ def extract_docx_text(data: bytes) -> str:
 
 def parse_resume_with_openai(text: str) -> ParsedResume:
     client = OpenAI()
-    response = client.responses.parse(
+    response = client.beta.chat.completions.parse(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        input=[
+        messages=[
             {
                 "role": "system",
                 "content": "Extract resume data. Use nulls and empty arrays when data is missing.",
             },
             {"role": "user", "content": text[:50000]},
         ],
-        text_format=ParsedResume,
+        response_format=ParsedResume,
     )
-    return response.output_parsed
+    return response.choices[0].message.parsed
 
 
-async def get_or_create_test_user(db: AsyncSession) -> User:
-    email = "test@example.com"
-    user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
-    if user:
-        return user
-
-    user = User(email=email)
-    db.add(user)
-    await db.flush()
-    return user
 
 
 def resume_to_json(resume: Resume) -> dict[str, Any]:
     return {
         "id": str(resume.id),
-        "user_id": str(resume.user_id),
         "structured_data": resume.structured_data,
         "file_url": resume.file_url,
         "created_at": resume.created_at.isoformat(),
@@ -113,6 +103,7 @@ def resume_to_json(resume: Resume) -> dict[str, Any]:
 async def create_resume(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in {".pdf", ".docx"}:
@@ -134,7 +125,6 @@ async def create_resume(
     except Exception as exc:
         raise HTTPException(status_code=502, detail="OpenAI resume parsing failed.") from exc
 
-    user = await get_or_create_test_user(db)
     resume = Resume(user_id=user.id, structured_data=parsed.model_dump(), file_url=None)
     db.add(resume)
     await db.commit()

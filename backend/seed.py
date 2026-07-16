@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import date
 
 from sqlalchemy import select
 
+from backend.auth import hash_password
 from backend.database import AsyncSessionLocal
 from backend.models import Application, Resume, Score, TailoredDoc, User
 
 DEMO_EMAIL = "demo@applyiq.local"
+DEMO_PASSWORD = os.getenv("DEMO_PASSWORD")
 
 RESUME_DATA = {
     "name": "Alex Morgan",
@@ -74,12 +77,16 @@ Alex Morgan"""
 
 
 async def seed() -> None:
+    if not DEMO_PASSWORD:
+        raise RuntimeError("DEMO_PASSWORD must be set in backend/.env before seeding.")
     async with AsyncSessionLocal() as db:
         user = (await db.execute(select(User).where(User.email == DEMO_EMAIL))).scalar_one_or_none()
         if not user:
-            user = User(email=DEMO_EMAIL)
+            user = User(name="Alex Morgan", email=DEMO_EMAIL, password_hash=hash_password(DEMO_PASSWORD), role="admin", job_title="Software Engineer", bio="Building thoughtful job applications with ApplyIQ.")
             db.add(user)
             await db.flush()
+        else:
+            user.password_hash = hash_password(DEMO_PASSWORD)
 
         resume = (
             await db.execute(select(Resume).where(Resume.user_id == user.id).order_by(Resume.created_at.desc()))
