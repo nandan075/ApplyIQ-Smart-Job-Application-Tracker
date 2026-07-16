@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Icon from "./Icon.jsx";
+import ResumeUpload from "./ResumeUpload.jsx";
+
 
 export function SignInPage({ onSignIn, onSignUp, error }) {
   const [mode, setMode] = useState("signin");
@@ -98,8 +100,48 @@ export function SignInPage({ onSignIn, onSignUp, error }) {
   );
 }
 
-export function ProfilePage({ user, openSettings }) {
-  return <div className="page account-page"><div className="page-title-row"><div><p className="eyebrow">Account</p><h2>Profile</h2></div><button className="gold-button" onClick={openSettings}><Icon name="edit" />Edit profile</button></div><section className="panel profile-summary"><div className="profile-initial">{(user.name || user.email).slice(0, 1).toUpperCase()}</div><div><h3>{user.name || "ApplyIQ user"}</h3><p>{user.job_title || "Career candidate"}</p><p>{user.email}</p>{user.bio && <p>{user.bio}</p>}</div></section></div>;
+export function ProfilePage({ user, openSettings, latestResume, onUploadResume, uploading }) {
+  return (
+    <div className="page account-page">
+      <div className="page-title-row">
+        <div>
+          <p className="eyebrow">Account</p>
+          <h2>Profile</h2>
+        </div>
+        <button className="gold-button" onClick={openSettings}>
+          <Icon name="edit" />Edit profile
+        </button>
+      </div>
+      
+      <section className="panel profile-summary">
+        <div className="profile-initial">{(user.name || user.email).slice(0, 1).toUpperCase()}</div>
+        <div>
+          <h3>{user.name || "ApplyIQ user"}</h3>
+          <p>{user.job_title || "Career candidate"}</p>
+          <p>{user.email}</p>
+          {user.bio && <p>{user.bio}</p>}
+        </div>
+      </section>
+
+      <section className="profile-resume-section" style={{ marginTop: "24px" }}>
+        <div style={{ marginBottom: "12px" }}>
+          <h3>Default Resume for Application Tracking</h3>
+          <p style={{ color: "var(--secondary)", fontSize: "0.9rem" }}>
+            Upload your default resume here. It will be used to automatically calculate match scores and generate tailored suggestions when you add jobs.
+          </p>
+        </div>
+        <ResumeUpload onFileSelected={onUploadResume} uploading={uploading} />
+        {latestResume && (
+          <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "8px", color: "#10b981", fontSize: "0.9rem" }}>
+            <Icon name="checkCircle" size={16} />
+            <span>
+              Default resume is set (uploaded on {new Date(latestResume.created_at).toLocaleDateString()})
+            </span>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }
 
 export function SettingsPage({ user, onSave }) {

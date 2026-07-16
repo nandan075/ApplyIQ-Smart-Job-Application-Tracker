@@ -1,0 +1,23 @@
+{
+  "Languages": [
+    "Python", "JavaScript", "TypeScript", "Java", "Go", "Rust", "C++", "C#", "SQL", "R", "Ruby", "PHP", "Swift", "Kotlin", "Scala"
+  ],
+  "Frontend": [
+    "React", "Vue", "Angular", "Next.js", "Svelte", "HTML", "CSS", "Tailwind", "Bootstrap", "Redux", "Webpack", "Vite"
+  ],
+  "Backend": [
+    "Node.js", "Express", "FastAPI", "Django", "Flask", "Spring Boot", "ASP.NET", "Ruby on Rails", "Laravel", "GraphQL", "REST", "gRPC"
+  ],
+  "Databases": [
+    "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra", "DynamoDB", "SQLite", "Oracle", "SQL Server"
+  ],
+  "Cloud & DevOps": [
+    "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitHub Actions", "GitLab CI", "Linux", "Nginx"
+  ],
+  "Data & Machine Learning": [
+    "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "PyTorch", "Hadoop", "Spark", "Kafka", "Airflow", "Databricks", "Snowflake"
+  ],
+  "Tools & Methodologies": [
+    "Git", "Jira", "Agile", "Scrum", "TDD", "CI/CD", "Microservices", "System Design"
+  ]
+}

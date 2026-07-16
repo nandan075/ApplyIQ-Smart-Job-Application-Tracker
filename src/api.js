@@ -23,6 +23,8 @@ export const signOut = () => request("/auth/logout", { method: "POST" });
 export const getCurrentUser = () => request("/auth/me");
 export const updateCurrentUser = (profile) => request("/auth/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) });
 export function uploadResume(file) { const body = new FormData(); body.append("file", file); return request("/resumes", { method: "POST", body }); }
+export const getLatestResume = () => request("/resumes/latest");
+
 export const createApplication = (jdText) => request("/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jd_text: jdText }) });
 export const scoreApplication = (appId) => request(`/applications/${appId}/score`, { method: "POST" });
 export const tailorApplication = (appId) => request(`/applications/${appId}/tailor`, { method: "POST" });

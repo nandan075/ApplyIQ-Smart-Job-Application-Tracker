@@ -9,53 +9,18 @@ from typing import Any
 import pdfplumber
 from docx import Document
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from openai import OpenAI, RateLimitError
-from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.auth import get_current_user
 from backend.database import get_db
 from backend.models import Resume, User
+from backend.resume_parser import parse_resume_local
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
 
-class ContactInfo(BaseModel):
-    email: str | None = None
-    phone: str | None = None
-    location: str | None = None
-    linkedin: str | None = None
-    github: str | None = None
-    website: str | None = None
-
-
-class SkillCategory(BaseModel):
-    category: str
-    skills: list[str] = Field(default_factory=list)
-
-
-class ExperienceItem(BaseModel):
-    company: str | None = None
-    role: str | None = None
-    dates: str | None = None
-    bullets: list[str] = Field(default_factory=list)
-
-
-class EducationItem(BaseModel):
-    institution: str | None = None
-    degree: str | None = None
-    dates: str | None = None
-    details: list[str] = Field(default_factory=list)
-
-
-class ParsedResume(BaseModel):
-    name: str | None = None
-    contact_info: ContactInfo = Field(default_factory=ContactInfo)
-    skills: list[SkillCategory] = Field(default_factory=list)
-    experience: list[ExperienceItem] = Field(default_factory=list)
-    education: list[EducationItem] = Field(default_factory=list)
-    certifications: list[str] = Field(default_factory=list)
+# Local parser used instead of Pydantic models here
 
 
 def clean_text(text: str) -> str:
@@ -72,20 +37,7 @@ def extract_docx_text(data: bytes) -> str:
     return clean_text("\n".join(paragraph.text for paragraph in doc.paragraphs))
 
 
-def parse_resume_with_openai(text: str) -> ParsedResume:
-    client = OpenAI()
-    response = client.beta.chat.completions.parse(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        messages=[
-            {
-                "role": "system",
-                "content": "Extract resume data. Use nulls and empty arrays when data is missing.",
-            },
-            {"role": "user", "content": text[:50000]},
-        ],
-        response_format=ParsedResume,
-    )
-    return response.choices[0].message.parsed
+# Deleted openai parser function
 
 
 
@@ -119,14 +71,30 @@ async def create_resume(
         raise HTTPException(status_code=400, detail="Resume file did not contain readable text.")
 
     try:
-        parsed = await asyncio.to_thread(parse_resume_with_openai, text)
-    except RateLimitError as exc:
-        raise HTTPException(status_code=429, detail="OpenAI rate limit reached. Try again later.") from exc
+        parsed = await asyncio.to_thread(parse_resume_local, text)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail="OpenAI resume parsing failed.") from exc
+        raise HTTPException(status_code=502, detail="Resume parsing failed.") from exc
 
     resume = Resume(user_id=user.id, structured_data=parsed.model_dump(), file_url=None)
     db.add(resume)
     await db.commit()
     await db.refresh(resume)
     return resume_to_json(resume)
+
+
+@router.get("/latest")
+async def get_latest_user_resume(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> dict[str, Any] | None:
+    resume = (
+        await db.execute(
+            select(Resume)
+            .where(Resume.user_id == user.id)
+            .order_by(Resume.created_at.desc())
+        )
+    ).scalars().first()
+    if not resume:
+        return None
+    return resume_to_json(resume)
+

@@ -12,6 +12,7 @@ import {
   signOut,
   updateCurrentUser,
   downloadExport,
+  getLatestResume,
 } from "./api.js";
 import Icon from "./components/Icon.jsx";
 import JDInput from "./components/JDInput.jsx";
@@ -61,7 +62,7 @@ function Shell({ activePage, setActivePage, openQuickAdd, error, clearError, sta
   );
 }
 
-function Dashboard({ user, applications, scores, loading, openQuickAdd, setActivePage }) {
+function Dashboard({ user, applications, scores, loading, openQuickAdd, setActivePage, setSelectedAppId }) {
   const counts = useMemo(() => {
     const base = { Wishlist: 0, Applied: 0, Interviewing: 0, Offer: 0 };
     applications.forEach((app) => { if (base[app.status] !== undefined) base[app.status] += 1; });
@@ -89,7 +90,25 @@ function Dashboard({ user, applications, scores, loading, openQuickAdd, setActiv
             <div className="analysis-feed">
               {loading && <div className="panel skeleton-stack"><span /><span /><span /></div>}
               {!loading && recent.length === 0 && <div className="panel empty-state">No applications yet. Add one to start scoring.</div>}
-              {recent.map((item) => <article className="analysis-card" key={item.id}><div className="company-logo">{item.company.slice(0, 1)}</div><div><h4>{item.role}</h4><p>{item.company}</p><span>{item.jd_text.slice(0, 96)}...</span></div><strong>{scores[item.id]?.relevance_score || 0}%</strong></article>)}
+              {recent.map((item) => (
+                <article
+                  className="analysis-card clickable"
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedAppId(item.id);
+                    setActivePage("relevance");
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="company-logo">{item.company.slice(0, 1)}</div>
+                  <div>
+                    <h4>{item.role}</h4>
+                    <p>{item.company}</p>
+                    <span>{item.jd_text.slice(0, 96)}...</span>
+                  </div>
+                  <strong>{scores[item.id]?.relevance_score || 0}%</strong>
+                </article>
+              ))}
             </div>
           </section>
         </div>
@@ -99,11 +118,24 @@ function Dashboard({ user, applications, scores, loading, openQuickAdd, setActiv
   );
 }
 
-function RelevanceChecker({ jd, setJd, onUploadResume, onAnalyze, onTailor, pending, score }) {
-  const scoreValue = score?.relevance_score || 18;
+function RelevanceChecker({ selectedApplication, jd, setJd, onUploadResume, onAnalyze, onTailor, pending, score }) {
+  const scoreValue = score?.relevance_score || 0;
   return (
     <div className="page page-scroll">
-      <div className="page-title-row"><div><p className="eyebrow">Resume Optimizer</p><h2>Relevance Checker</h2><p>Upload your resume and paste a job description to compare fit.</p></div><button className="icon-square"><Icon name="more" /></button></div>
+      <div className="page-title-row">
+        <div>
+          <p className="eyebrow">Resume Optimizer</p>
+          <h2>Relevance Checker</h2>
+          {selectedApplication ? (
+            <p className="job-details-subtitle" style={{ fontSize: "1.1rem", marginTop: "4px" }}>
+              Comparing fit for: <strong style={{ color: "var(--primary, #f59e0b)" }}>{selectedApplication.role}</strong> at <strong style={{ color: "var(--primary, #f59e0b)" }}>{selectedApplication.company}</strong>
+            </p>
+          ) : (
+            <p>Upload your resume and paste a job description to compare fit.</p>
+          )}
+        </div>
+        <button className="icon-square"><Icon name="more" /></button>
+      </div>
       <section className="input-grid">
         <ResumeUpload onFileSelected={onUploadResume} uploading={pending.upload} />
         <JDInput value={jd} onChange={setJd} onAnalyze={onAnalyze} loading={pending.create || pending.score} />
@@ -138,6 +170,7 @@ function QuickAddModal({ open, onClose, onSubmit, loading }) {
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [user, setUser] = useState(null);
+  const [latestResume, setLatestResume] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [jd, setJd] = useState("We need a senior frontend engineer with React, Node.js, AWS, mentoring, GraphQL APIs, and measurable product impact.");
@@ -160,13 +193,27 @@ export default function App() {
   }
 
   useEffect(() => {
-    getCurrentUser().then(setUser).catch((err) => { if (err.status !== 401) setError(err.message); }).finally(() => setAuthReady(true));
+    getCurrentUser()
+      .then((u) => {
+        setUser(u);
+        return getLatestResume();
+      })
+      .then(setLatestResume)
+      .catch((err) => { if (err.status !== 401) setError(err.message); })
+      .finally(() => setAuthReady(true));
   }, []);
 
   useEffect(() => {
     if (!user) return;
     refreshApplications().catch((err) => setError(err.message)).finally(() => setPending((p) => ({ ...p, initial: false })));
+    getLatestResume().then(setLatestResume).catch(() => {});
   }, [user]);
+
+  useEffect(() => {
+    if (selectedApplication) {
+      setJd(selectedApplication.jd_text);
+    }
+  }, [selectedApplication]);
 
   async function run(key, action) {
     setError("");
@@ -202,7 +249,9 @@ export default function App() {
     try { setUser(await updateCurrentUser(profile)); setActivePage("profile"); } catch (err) { setError(err.message); throw err; }
   }
   async function handleUploadResume(file) {
-    await run("upload", () => uploadResume(file));
+    const resume = await run("upload", () => uploadResume(file));
+    setLatestResume(resume);
+    return resume;
   }
 
   async function analyzeText(text = jd) {
@@ -210,17 +259,34 @@ export default function App() {
     setApplications((items) => [application, ...items.filter((item) => item.id !== application.id)]);
     setSelectedAppId(application.id);
     setModalOpen(false);
-    const score = await run("score", () => scoreApplication(application.id));
-    setScores((items) => ({ ...items, [application.id]: score }));
+    setActivePage("relevance");
+    try {
+      const score = await run("score", () => scoreApplication(application.id));
+      setScores((items) => ({ ...items, [application.id]: score }));
+    } catch (err) {
+      if (err.status === 404) {
+        setError("Application tracked! Upload a default resume in your Profile to automatically check fit scores.");
+      } else {
+        setError(err.message);
+      }
+    }
     await refreshApplications();
     return application;
   }
 
   async function handleTailor() {
     if (!selectedApplication) return setError("Create or select an application before tailoring documents.");
-    const doc = await run("tailor", () => tailorApplication(selectedApplication.id));
-    setTailoredDocs((items) => ({ ...items, [selectedApplication.id]: doc }));
-    setActivePage("tailoring");
+    try {
+      const doc = await run("tailor", () => tailorApplication(selectedApplication.id));
+      setTailoredDocs((items) => ({ ...items, [selectedApplication.id]: doc }));
+      setActivePage("tailoring");
+    } catch (err) {
+      if (err.status === 404) {
+        setError("Please upload a resume in your Profile before tailoring documents.");
+      } else {
+        setError(err.message);
+      }
+    }
     await refreshApplications();
   }
 
@@ -254,13 +320,13 @@ export default function App() {
   }
 
   const screen =
-    activePage === "dashboard" ? <Dashboard user={user} applications={applications} scores={scores} loading={pending.initial} openQuickAdd={() => setModalOpen(true)} setActivePage={setActivePage} /> :
+    activePage === "dashboard" ? <Dashboard user={user} applications={applications} scores={scores} loading={pending.initial} openQuickAdd={() => setModalOpen(true)} setActivePage={setActivePage} setSelectedAppId={setSelectedAppId} /> :
     activePage === "tailoring" ? <TailorWorkspace application={selectedApplication} tailoredDoc={selectedTailoredDoc} loading={pending.tailor} onTailor={handleTailor} onExport={handleExport} score={selectedScore?.relevance_score || 87} /> :
-    activePage === "tracker" ? <TrackerBoard applications={applications} scores={scores} loading={pending.initial} pendingStatusId={pending.statusId} onStatusChange={handleStatusChange} /> :
-    activePage === "profile" ? <ProfilePage user={user} openSettings={() => setActivePage("settings")} /> :
+    activePage === "tracker" ? <TrackerBoard applications={applications} scores={scores} loading={pending.initial} pendingStatusId={pending.statusId} onStatusChange={handleStatusChange} setSelectedAppId={setSelectedAppId} setActivePage={setActivePage} /> :
+    activePage === "profile" ? <ProfilePage user={user} openSettings={() => setActivePage("settings")} latestResume={latestResume} onUploadResume={handleUploadResume} uploading={pending.upload} /> :
     activePage === "settings" ? <SettingsPage user={user} onSave={handleProfileSave} /> :
     activePage === "help" ? <HelpPage /> :
-    <RelevanceChecker jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
+    <RelevanceChecker selectedApplication={selectedApplication} jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
   if (!authReady) return null;
   if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} error={error} />;
