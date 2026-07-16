@@ -31,6 +31,8 @@ Create `backend\.env`:
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/applyiq
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini
+SESSION_SECRET=replace-with-a-long-random-value
+DEMO_PASSWORD=choose-a-local-demo-password
 ```
 
 `OPENAI_API_KEY` is only required when you upload/parse a real resume, create applications from unstructured JDs, score applications, or generate new tailored docs. The seed data lets the app open with mock content without using OpenAI.
@@ -74,14 +76,18 @@ The seed is idempotent and can be run more than once.
 ## 7. Start FastAPI
 
 ```powershell
+# Start on default port 8000:
 uvicorn backend.main:app --reload
+
+# If port 8000 is in use, start on port 8001:
+uvicorn backend.main:app --reload --port 8001
 ```
 
 Open:
 
 ```text
-http://127.0.0.1:8000/docs
-http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs (or http://127.0.0.1:8001/docs)
+http://127.0.0.1:8000/health (or http://127.0.0.1:8001/health)
 ```
 
 ## 8. Start The Vite App
@@ -95,13 +101,13 @@ npm run dev
 Open:
 
 ```text
-http://127.0.0.1:5173
+http://127.0.0.1:5173 (or http://127.0.0.1:5175 if 5173 is occupied)
 ```
 
-If your API runs somewhere else, create a frontend env file such as `.env.local`:
+If your API runs on a fallback port (like 8001), create a frontend env file `.env.local`:
 
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_API_BASE_URL=http://127.0.0.1:8001
 ```
 
 ## Useful API Endpoints

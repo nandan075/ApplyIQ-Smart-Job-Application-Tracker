@@ -821,6 +821,9 @@ mark { background: var(--tertiary-fixed); color: var(--on-surface); border-radiu
 .settings-form { max-width: 680px; display: grid; gap: 20px; }
 .settings-form textarea { min-height: 120px; resize: vertical; }
 .auth-error { color: var(--error) !important; }
+.auth-toggle { text-align: center; color: var(--secondary); font-size: 0.9rem; margin-top: 4px; }
+.auth-toggle-link { background: none; border: none; padding: 0; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-size: inherit; }
+.auth-toggle-link:hover { color: var(--on-surface); }
 .account-page { max-width: 920px; }
 .profile-summary { display: flex; align-items: flex-start; gap: 20px; }
 .profile-summary p { margin: 4px 0; color: var(--secondary); }

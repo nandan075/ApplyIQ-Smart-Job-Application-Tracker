@@ -8,6 +8,7 @@ import {
   uploadResume,
   getCurrentUser,
   signIn,
+  signUp,
   signOut,
   updateCurrentUser,
   downloadExport,
@@ -185,6 +186,11 @@ export default function App() {
     try { setUser(await signIn(email, password)); } catch (err) { setError(err.message); throw err; }
   }
 
+  async function handleSignUp(name, email, password) {
+    setError("");
+    try { setUser(await signUp(name, email, password)); } catch (err) { setError(err.message); throw err; }
+  }
+
   async function handleSignOut() {
     await signOut();
     setUser(null);
@@ -257,7 +263,7 @@ export default function App() {
     <RelevanceChecker jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
   if (!authReady) return null;
-  if (!user) return <SignInPage onSignIn={handleSignIn} error={error} />;
+  if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} error={error} />;
 
   return (
     <Shell activePage={activePage} setActivePage={setActivePage} openQuickAdd={() => setModalOpen(true)} error={error} clearError={() => setError("")} statusText={statusText} onLogout={handleSignOut}>

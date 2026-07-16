@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import Icon from "./Icon.jsx";
 
-export function SignInPage({ onSignIn, error }) {
+export function SignInPage({ onSignIn, onSignUp, error }) {
+  const [mode, setMode] = useState("signin");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -10,7 +12,19 @@ export function SignInPage({ onSignIn, error }) {
   async function submit(event) {
     event.preventDefault();
     setPending(true);
-    try { await onSignIn(email, password); } finally { setPending(false); }
+    try {
+      if (mode === "signup") {
+        await onSignUp(name, email, password);
+      } else {
+        await onSignIn(email, password);
+      }
+    } finally {
+      setPending(false);
+    }
+  }
+
+  function toggleMode() {
+    setMode(mode === "signin" ? "signup" : "signin");
   }
 
   return (
@@ -23,12 +37,18 @@ export function SignInPage({ onSignIn, error }) {
             <p>Career Assistant</p>
           </div>
         </div>
-        <h2>Sign in</h2>
-        <p>Continue to your application workspace.</p>
+        <h2>{mode === "signin" ? "Sign in" : "Create account"}</h2>
+        <p>{mode === "signin" ? "Continue to your application workspace." : "Get started with ApplyIQ for free."}</p>
         {error && <p className="auth-error">{error}</p>}
+        {mode === "signup" && (
+          <label>
+            Full Name
+            <input type="text" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" placeholder="Alex Morgan" />
+          </label>
+        )}
         <label>
           Email
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="you@example.com" />
         </label>
         <label>
           Password
@@ -39,7 +59,8 @@ export function SignInPage({ onSignIn, error }) {
               onChange={(event) => setPassword(event.target.value)}
               required
               minLength="8"
-              autoComplete="current-password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              placeholder="Min 8 characters"
               style={{ paddingRight: "44px", width: "100%" }}
             />
             <button
@@ -64,8 +85,14 @@ export function SignInPage({ onSignIn, error }) {
         </label>
         <button className="gold-button" disabled={pending}>
           {pending ? <Icon name="loader" className="spin" /> : <Icon name="applied" />}
-          Sign in
+          {mode === "signin" ? "Sign in" : "Create account"}
         </button>
+        <p className="auth-toggle">
+          {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+          <button type="button" className="auth-toggle-link" onClick={toggleMode}>
+            {mode === "signin" ? "Create one" : "Sign in"}
+          </button>
+        </p>
       </form>
     </main>
   );

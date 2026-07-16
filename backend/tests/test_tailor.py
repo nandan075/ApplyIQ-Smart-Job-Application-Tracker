@@ -4,7 +4,7 @@ import unittest
 
 from fastapi import HTTPException
 
-from backend.models import Application, Resume, Score, TailoredDoc
+from backend.models import Application, Resume, Score, TailoredDoc, User
 from backend.routers import applications
 from backend.tailoring import TAILOR_SYSTEM_PROMPT, TailoredAssets, build_tailor_input
 
@@ -99,7 +99,7 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
         original = applications.tailor_with_openai
         applications.tailor_with_openai = fake_tailor
         try:
-            response = await applications.tailor_application(app_id, db)
+            response = await applications.tailor_application(app_id, db, User(id=user_id, email="test@example.com"))
         finally:
             applications.tailor_with_openai = original
 
@@ -140,7 +140,7 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
         original = applications.score_with_openai
         applications.score_with_openai = fake_score
         try:
-            response = await applications.score_application(app_id, db)
+            response = await applications.score_application(app_id, db, User(id=user_id, email="test@example.com"))
         finally:
             applications.score_with_openai = original
 
@@ -164,6 +164,7 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
             app_id,
             applications.ApplicationStatusUpdate(status="Interviewing"),
             FakeDb(application),
+            User(id=application.user_id, email="test@example.com"),
         )
 
         self.assertEqual(response.status, "Interviewing")
@@ -203,7 +204,7 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
             fix_suggestions=[],
         )
 
-        response = await applications.export_application(app_id, FakeDb(application, doc, resume, score))
+        response = await applications.export_application(app_id, FakeDb(application, doc, resume, score), User(id=user_id, email="test@example.com"))
 
         self.assertIn("attachment", response.headers["content-disposition"])
         body = response.body.decode()
@@ -223,14 +224,14 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
             created_at=datetime.now(timezone.utc),
         )
         with self.assertRaises(HTTPException) as error:
-            await applications.export_application(app_id, FakeDb(application, None))
+            await applications.export_application(app_id, FakeDb(application, None), User(id=application.user_id, email="test@example.com"))
 
         self.assertEqual(error.exception.status_code, 404)
         self.assertEqual(error.exception.detail, "No tailored document found for this application.")
 
     async def test_tailor_application_404s_without_application(self):
         with self.assertRaises(HTTPException) as error:
-            await applications.tailor_application(uuid4(), FakeDb(None))
+            await applications.tailor_application(uuid4(), FakeDb(None), User(id=uuid4(), email="test@example.com"))
 
         self.assertEqual(error.exception.status_code, 404)
         self.assertEqual(error.exception.detail, "Application not found.")

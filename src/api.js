@@ -18,6 +18,7 @@ async function request(path, options = {}) {
 }
 
 export const signIn = (email, password) => request("/auth/signin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+export const signUp = (name, email, password) => request("/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, password }) });
 export const signOut = () => request("/auth/logout", { method: "POST" });
 export const getCurrentUser = () => request("/auth/me");
 export const updateCurrentUser = (profile) => request("/auth/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) });
