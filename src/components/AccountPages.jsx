@@ -5,6 +5,7 @@ export function SignInPage({ onSignIn, error }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit(event) {
     event.preventDefault();
@@ -12,7 +13,62 @@ export function SignInPage({ onSignIn, error }) {
     try { await onSignIn(email, password); } finally { setPending(false); }
   }
 
-  return <main className="auth-page"><form className="auth-form" onSubmit={submit}><div className="brand-block"><div className="brand-mark">AIQ</div><div><h1>ApplyIQ</h1><p>Career Assistant</p></div></div><h2>Sign in</h2><p>Continue to your application workspace.</p>{error && <p className="auth-error">{error}</p>}<label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength="8" autoComplete="current-password" /></label><button className="gold-button" disabled={pending}>{pending ? <Icon name="loader" className="spin" /> : <Icon name="applied" />}Sign in</button></form></main>;
+  return (
+    <main className="auth-page">
+      <form className="auth-form" onSubmit={submit}>
+        <div className="brand-block">
+          <div className="brand-mark">AIQ</div>
+          <div>
+            <h1>ApplyIQ</h1>
+            <p>Career Assistant</p>
+          </div>
+        </div>
+        <h2>Sign in</h2>
+        <p>Continue to your application workspace.</p>
+        {error && <p className="auth-error">{error}</p>}
+        <label>
+          Email
+          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+        </label>
+        <label>
+          Password
+          <div className="password-input-wrapper" style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength="8"
+              autoComplete="current-password"
+              style={{ paddingRight: "44px", width: "100%" }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "12px",
+                background: "none",
+                border: "none",
+                padding: 0,
+                color: "var(--secondary)",
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              <Icon name={showPassword ? "eyeOff" : "eye"} size={20} />
+            </button>
+          </div>
+        </label>
+        <button className="gold-button" disabled={pending}>
+          {pending ? <Icon name="loader" className="spin" /> : <Icon name="applied" />}
+          Sign in
+        </button>
+      </form>
+    </main>
+  );
 }
 
 export function ProfilePage({ user, openSettings }) {

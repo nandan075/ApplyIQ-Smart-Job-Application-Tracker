@@ -13,7 +13,7 @@ I am excited by TechNova's focus on scalable product systems. My recent work com
 
 I would welcome the chance to bring that blend of product judgment and delivery discipline to your team.`;
 
-export default function TailorWorkspace({ application, tailoredDoc, loading = false, onTailor, score = 87 }) {
+export default function TailorWorkspace({ application, tailoredDoc, loading = false, onTailor, onExport, score = 87 }) {
   const [copied, setCopied] = useState("");
   const bullets = tailoredDoc?.tailored_bullets || defaultBullets;
   const coverLetter = tailoredDoc?.cover_letter || defaultLetter;
@@ -33,6 +33,11 @@ export default function TailorWorkspace({ application, tailoredDoc, loading = fa
         </div>
         <div className="button-row">
           <button className="outline-button"><Icon name="history" />Version History</button>
+          {tailoredDoc && (
+            <button className="gold-button" onClick={onExport} disabled={loading}>
+              <Icon name="download" />Export Docs
+            </button>
+          )}
           <button className="gold-button" onClick={onTailor} disabled={loading || !application}>
             <Icon name={loading ? "loader" : "wand"} className={loading ? "spin" : ""} />
             {tailoredDoc ? "Regenerate" : "Generate"}

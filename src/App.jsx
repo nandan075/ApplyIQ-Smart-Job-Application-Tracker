@@ -10,6 +10,7 @@ import {
   signIn,
   signOut,
   updateCurrentUser,
+  downloadExport,
 } from "./api.js";
 import Icon from "./components/Icon.jsx";
 import JDInput from "./components/JDInput.jsx";
@@ -59,7 +60,7 @@ function Shell({ activePage, setActivePage, openQuickAdd, error, clearError, sta
   );
 }
 
-function Dashboard({ applications, scores, loading, openQuickAdd, setActivePage }) {
+function Dashboard({ user, applications, scores, loading, openQuickAdd, setActivePage }) {
   const counts = useMemo(() => {
     const base = { Wishlist: 0, Applied: 0, Interviewing: 0, Offer: 0 };
     applications.forEach((app) => { if (base[app.status] !== undefined) base[app.status] += 1; });
@@ -75,7 +76,7 @@ function Dashboard({ applications, scores, loading, openQuickAdd, setActivePage 
 
   return (
     <div className="page dashboard-page">
-      <div className="page-title-row"><div><h2>Welcome back, Alex.</h2><p>Let's keep the momentum going on your applications.</p></div></div>
+      <div className="page-title-row"><div><h2>Welcome back, {user?.name || "there"}.</h2><p>Let's keep the momentum going on your applications.</p></div></div>
       <section className="stats-grid">
         {stats.map((stat) => <article className={`stat-card ${stat.featured ? "featured" : ""}`} key={stat.label}><div className="stat-orb" /><Icon name={stat.icon} /><strong>{stat.value}</strong><span>{stat.label}</span></article>)}
       </section>
@@ -217,6 +218,19 @@ export default function App() {
     await refreshApplications();
   }
 
+  async function handleExport() {
+    if (!selectedApplication) return;
+    try {
+      const filename = `applyiq-${selectedApplication.company}-${selectedApplication.role}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") + ".md";
+      await downloadExport(selectedApplication.id, filename);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleStatusChange(appId, status) {
     setError("");
     setPending((p) => ({ ...p, statusId: appId }));
@@ -234,8 +248,8 @@ export default function App() {
   }
 
   const screen =
-    activePage === "dashboard" ? <Dashboard applications={applications} scores={scores} loading={pending.initial} openQuickAdd={() => setModalOpen(true)} setActivePage={setActivePage} /> :
-    activePage === "tailoring" ? <TailorWorkspace application={selectedApplication} tailoredDoc={selectedTailoredDoc} loading={pending.tailor} onTailor={handleTailor} score={selectedScore?.relevance_score || 87} /> :
+    activePage === "dashboard" ? <Dashboard user={user} applications={applications} scores={scores} loading={pending.initial} openQuickAdd={() => setModalOpen(true)} setActivePage={setActivePage} /> :
+    activePage === "tailoring" ? <TailorWorkspace application={selectedApplication} tailoredDoc={selectedTailoredDoc} loading={pending.tailor} onTailor={handleTailor} onExport={handleExport} score={selectedScore?.relevance_score || 87} /> :
     activePage === "tracker" ? <TrackerBoard applications={applications} scores={scores} loading={pending.initial} pendingStatusId={pending.statusId} onStatusChange={handleStatusChange} /> :
     activePage === "profile" ? <ProfilePage user={user} openSettings={() => setActivePage("settings")} /> :
     activePage === "settings" ? <SettingsPage user={user} onSave={handleProfileSave} /> :
