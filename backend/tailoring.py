@@ -11,12 +11,19 @@ You must ONLY reorder, rephrase, condense, expand, or emphasize experience, skil
 It is STRICTLY FORBIDDEN to invent or imply any tool, metric, date, company, title, project, certification, client, technology, domain, award, responsibility, or accomplishment that is not present in the base resume.
 If the job description asks for something absent from the resume, omit it or frame adjacent real experience without claiming the missing item.
 Every tailored bullet and every cover letter claim must be traceable to the base resume JSON.
+Return exactly two assets: tailored_bullets and cover_letter. The cover letter must be professional, concise, and focused only on the intersection of the base resume and target role goals.
 """
 
 
 class TailoredAssets(BaseModel):
-    tailored_bullets: list[str] = Field(min_length=1)
-    cover_letter: str = Field(min_length=1)
+    tailored_bullets: list[str] = Field(
+        min_length=1,
+        description="Modified resume bullets grounded only in the base resume and aligned to JD keywords.",
+    )
+    cover_letter: str = Field(
+        min_length=1,
+        description="Concise professional cover letter grounded only in the base resume and target role goals.",
+    )
 
 
 def build_tailor_input(resume_data: dict, jd_text: str) -> list[dict[str, str]]:
