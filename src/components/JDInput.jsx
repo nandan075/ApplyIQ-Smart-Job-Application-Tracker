@@ -1,6 +1,6 @@
 import Icon from "./Icon.jsx";
 
-export default function JDInput({ value, onChange, onAnalyze }) {
+export default function JDInput({ value, onChange, onAnalyze, loading = false }) {
   return (
     <div className="panel jd-panel">
       <div className="panel-heading">
@@ -13,9 +13,9 @@ export default function JDInput({ value, onChange, onAnalyze }) {
         placeholder="Paste the full job description here to analyze relevance..."
       />
       <div className="right-actions jd-actions">
-        <button className="gold-button" onClick={onAnalyze} disabled={!value.trim()}>
-          <Icon name="sparkles" />
-          Analyze & Track
+        <button className="gold-button" onClick={onAnalyze} disabled={!value.trim() || loading}>
+          <Icon name={loading ? "loader" : "sparkles"} className={loading ? "spin" : ""} />
+          {loading ? "Analyzing..." : "Analyze & Track"}
         </button>
       </div>
     </div>

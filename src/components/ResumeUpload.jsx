@@ -1,21 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
 
-export default function ResumeUpload({ onFileSelected }) {
+export default function ResumeUpload({ onFileSelected, uploading = false }) {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("idle");
   const timer = useRef(null);
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  function chooseFile(nextFile) {
-    if (!nextFile) return;
+  async function chooseFile(nextFile) {
+    if (!nextFile || uploading) return;
     clearTimeout(timer.current);
     setFile(nextFile);
     setStatus("parsing");
-    onFileSelected?.(nextFile);
-    timer.current = setTimeout(() => setStatus("ready"), 900);
+    try {
+      await onFileSelected?.(nextFile);
+      setStatus("ready");
+    } catch (_error) {
+      setStatus("idle");
+    }
   }
+
+  const parsing = uploading || status === "parsing";
 
   return (
     <div className="panel upload-panel">
@@ -31,11 +37,12 @@ export default function ResumeUpload({ onFileSelected }) {
           chooseFile(event.dataTransfer.files[0]);
         }}
       >
-        <Icon name={status === "parsing" ? "loader" : "upload"} size={36} className={status === "parsing" ? "spin" : ""} />
+        <Icon name={parsing ? "loader" : "upload"} size={36} className={parsing ? "spin" : ""} />
         <strong>{file ? file.name : "Drag & Drop Resume"}</strong>
-        <span>{status === "ready" ? "Parsed and ready for matching" : "Supports PDF, DOCX, TXT (Max 5MB)"}</span>
-        <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={(event) => chooseFile(event.target.files[0])} />
-        <b>{status === "parsing" ? "Parsing..." : status === "ready" ? "Replace File" : "Browse Files"}</b>
+        <span>{status === "ready" ? "Parsed and ready for matching" : "Parsing text + structured output takes about 3-5 seconds"}</span>
+        <input type="file" accept=".pdf,.docx" disabled={uploading} onChange={(event) => chooseFile(event.target.files[0])} />
+        <b>{parsing ? "Parsing..." : status === "ready" ? "Replace File" : "Browse Files"}</b>
+        {parsing && <div className="upload-progress"><span /></div>}
       </label>
     </div>
   );

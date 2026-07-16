@@ -1,91 +1,77 @@
 # ApplyIQ
 
-ApplyIQ is a job application tracker with a Vite/React frontend and a FastAPI + PostgreSQL backend. The backend can parse resumes, store job applications, and generate tailored resume bullets plus a cover letter using OpenAI structured outputs.
+ApplyIQ is a Vite/React and FastAPI application for tracking job applications, scoring resume fit, and generating tailored resume bullets plus cover letters. The project can run with seeded demo data so you can explore the UI before adding an OpenAI key.
 
-## What Is Built
+## Prerequisites
 
-- Frontend scaffold with Vite and React.
-- Static Stitch mockups in `stitch_exports/`.
-- FastAPI backend in `backend/`.
-- PostgreSQL local database via `docker-compose.yml`.
-- Async SQLAlchemy models and Alembic migrations.
-- Resume upload endpoint:
-  - `POST /resumes`
-  - Accepts `.pdf` or `.docx`.
-  - Extracts text with `pdfplumber` or `python-docx`.
-  - Parses structured resume JSON with OpenAI.
-  - Stores data in `resumes`.
-- Application endpoint:
-  - `POST /applications`
-  - Accepts pasted job description text.
-  - Extracts company, role, and deadline when missing.
-  - Stores data in `applications`.
-- Tailoring endpoint:
-  - `POST /applications/{application_id}/tailor`
-  - Uses the latest stored resume and application job description.
-  - Generates `tailored_bullets` and `cover_letter`.
-  - Stores data in `tailored_docs`.
-- Small test suite for tailoring prompt safety.
-
-## Requirements
-
-- Node.js
+- Node.js 20+
 - Python 3.11+
 - Docker Desktop
-- OpenAI API key
+- PowerShell or a compatible shell
 
-## Project Structure
+## 1. Install Frontend Dependencies
 
-```text
-.
-+-- src/                    # Vite React frontend
-+-- stitch_exports/         # Exported static UI mockups
-+-- backend/
-|   +-- alembic/            # Database migrations
-|   +-- routers/            # FastAPI route modules
-|   +-- tests/              # Backend tests
-|   +-- database.py         # Async DB setup
-|   +-- main.py             # FastAPI app
-|   +-- models.py           # SQLAlchemy models
-|   +-- tailoring.py        # Tailoring prompt + OpenAI call
-|   +-- requirements.txt
-|   +-- .env.example
-+-- docker-compose.yml      # Local Postgres
-+-- package.json
-+-- vite.config.js
+```powershell
+npm install
 ```
 
-## Backend Setup
-
-From the project root:
+## 2. Create A Python Environment
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r backend\requirements.txt
-copy backend\.env.example backend\.env
 ```
 
-Edit `backend\.env` and set:
+## 3. Configure Backend Environment
+
+Create `backend\.env`:
 
 ```env
-OPENAI_API_KEY=your_real_key_here
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/applyiq
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4o-mini
 ```
 
-Start PostgreSQL:
+`OPENAI_API_KEY` is only required when you upload/parse a real resume, create applications from unstructured JDs, score applications, or generate new tailored docs. The seed data lets the app open with mock content without using OpenAI.
+
+## 4. Start Postgres
 
 ```powershell
 docker compose up -d postgres
 ```
 
-Apply migrations:
+Postgres runs at `localhost:5432` with:
+
+- user: `postgres`
+- password: `postgres`
+- database: `applyiq`
+
+## 5. Run Database Migrations
 
 ```powershell
 alembic -c backend\alembic.ini upgrade head
 ```
 
-Run the backend:
+This creates the `users`, `resumes`, `applications`, `scores`, and `tailored_docs` tables.
+
+## 6. Seed Demo Data
+
+```powershell
+python -m backend.seed
+```
+
+The seed inserts:
+
+- `demo@applyiq.local`
+- a parsed software engineer resume
+- an `Interviewing` application for `Senior Software Engineer` at `OrbitWorks`
+- a mock relevance score
+- tailored resume bullets and a cover letter
+
+The seed is idempotent and can be run more than once.
+
+## 7. Start FastAPI
 
 ```powershell
 uvicorn backend.main:app --reload
@@ -98,12 +84,11 @@ http://127.0.0.1:8000/docs
 http://127.0.0.1:8000/health
 ```
 
-## Frontend Setup
+## 8. Start The Vite App
 
-In a second terminal:
+In another terminal:
 
 ```powershell
-npm install
 npm run dev
 ```
 
@@ -113,41 +98,27 @@ Open:
 http://127.0.0.1:5173
 ```
 
-To build the frontend:
+If your API runs somewhere else, create a frontend env file such as `.env.local`:
 
-```powershell
-npm run build
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-To preview the production build:
+## Useful API Endpoints
 
-```powershell
-npm run preview
+```text
+POST   /resumes
+GET    /applications
+POST   /applications
+PATCH  /applications/{id}/status
+POST   /applications/{id}/score
+POST   /applications/{id}/tailor
+GET    /applications/{id}/export
 ```
 
-## API Examples
+Export returns a downloadable Markdown file containing the match score, tailored resume bullets, cover letter, and original job description.
 
-Upload a resume:
-
-```powershell
-curl.exe -X POST http://127.0.0.1:8000/resumes -F "file=@C:\path\to\resume.pdf"
-```
-
-Create an application:
-
-```powershell
-curl.exe -X POST http://127.0.0.1:8000/applications `
-  -H "Content-Type: application/json" `
-  -d "{\"jd_text\":\"Acme is hiring a Backend Engineer. Apply by 2026-08-15.\"}"
-```
-
-Tailor documents for an application:
-
-```powershell
-curl.exe -X POST http://127.0.0.1:8000/applications/YOUR_APPLICATION_UUID/tailor
-```
-
-## Tests
+## Common Commands
 
 Run backend tests:
 
@@ -155,8 +126,57 @@ Run backend tests:
 python -m unittest discover backend\tests -v
 ```
 
+Compile backend files:
+
+```powershell
+python -m compileall -q backend
+```
+
+Build the frontend:
+
+```powershell
+npm run build
+```
+
+Stop Postgres:
+
+```powershell
+docker compose down
+```
+
+Remove local Postgres data:
+
+```powershell
+docker compose down -v
+```
+
+## Project Structure
+
+```text
+.
++-- backend/
+|   +-- alembic/              # Database migrations
+|   +-- routers/              # FastAPI routers
+|   +-- tests/                # Backend tests
+|   +-- database.py           # Async SQLAlchemy engine/session
+|   +-- models.py             # SQLAlchemy models
+|   +-- seed.py               # Demo data seed
+|   +-- tailoring.py          # OpenAI tailoring prompt and schema
+|   +-- requirements.txt
++-- src/
+|   +-- components/           # React UI components
+|   +-- api.js                # Fetch client
+|   +-- App.jsx               # App state and API wiring
+|   +-- main.jsx              # Vite entrypoint
+|   +-- styles.css
++-- stitch_exports/           # Original Stitch static exports
++-- docker-compose.yml
++-- package.json
++-- vite.config.js
+```
+
 ## Notes
 
-- The backend currently uses a default test user: `test@example.com`.
-- Resume tailoring is prompt-guarded to only rephrase or emphasize facts already present in the parsed resume.
-- Real authentication and file storage are not implemented yet.
+- Demo data avoids the OpenAI dependency for first run.
+- Real resume parsing, JD extraction, scoring, and tailoring call OpenAI.
+- Authentication and durable file storage are intentionally not implemented yet.

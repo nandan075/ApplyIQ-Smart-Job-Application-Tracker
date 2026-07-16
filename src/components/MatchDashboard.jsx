@@ -14,6 +14,7 @@ function AnalysisList({ title, icon, tone, items }) {
 }
 
 export default function MatchDashboard({
+  loading = false,
   score = 72,
   label = "Strong Match",
   strengths = [
@@ -32,6 +33,19 @@ export default function MatchDashboard({
     "Make mentoring impact visible with team size and cadence.",
   ],
 }) {
+  if (loading) {
+    return (
+      <section className="panel score-panel processing-skeleton" aria-busy="true">
+        <div className="score-gauge-wrap"><div className="skeleton-circle" /></div>
+        <div className="score-details">
+          <div className="skeleton-stack"><b /><span /><span /><span /></div>
+          <div className="skeleton-stack"><b /><span /><span /></div>
+          <div className="suggestions skeleton-stack"><b /><span /><span /><span /></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="panel score-panel">
       <div className="score-gauge-wrap">
