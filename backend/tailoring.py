@@ -40,7 +40,7 @@ def tailor_with_gemini(resume_data: dict, jd_text: str) -> TailoredAssets:
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-3.1-flash-lite",
                 contents=prompt,
                 config={
                     "response_mime_type": "application/json",
