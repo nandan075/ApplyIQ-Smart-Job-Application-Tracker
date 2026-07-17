@@ -62,7 +62,7 @@ function boardFromApplications(applications, scores) {
 export default function TrackerBoard({ applications = null, scores = {}, onStatusChange, pendingStatusId, loading = false, setSelectedAppId, setActivePage }) {
   const [dragging, setDragging] = useState(null);
   const [alertVisible, setAlertVisible] = useState(true);
-  const board = applications?.length ? boardFromApplications(applications, scores) : demoBoard;
+  const board = applications !== null ? boardFromApplications(applications, scores) : demoBoard;
 
   function moveCard(target) {
     if (!dragging || dragging.from === target) return setDragging(null);

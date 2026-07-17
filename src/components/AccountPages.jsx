@@ -3,7 +3,7 @@ import Icon from "./Icon.jsx";
 import ResumeUpload from "./ResumeUpload.jsx";
 
 
-export function SignInPage({ onSignIn, onSignUp, error }) {
+export function SignInPage({ onSignIn, onSignUp, onGoogleSignIn, error }) {
   const [mode, setMode] = useState("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,6 +28,27 @@ export function SignInPage({ onSignIn, onSignUp, error }) {
   function toggleMode() {
     setMode(mode === "signin" ? "signup" : "signin");
   }
+
+  useEffect(() => {
+    if (window.google) {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028711333798-h0m45skoboc4f1aeb1npsoc8b63e9f4j.apps.googleusercontent.com";
+      
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response) => {
+          if (response.credential) {
+            setPending(true);
+            onGoogleSignIn(response.credential).finally(() => setPending(false));
+          }
+        }
+      });
+      
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-btn"),
+        { theme: "outline", size: "large", type: "standard", shape: "rectangular", text: "continue_with", logo_alignment: "left" }
+      );
+    }
+  }, [mode]);
 
   return (
     <main className="auth-page">
@@ -89,6 +110,8 @@ export function SignInPage({ onSignIn, onSignUp, error }) {
           {pending ? <Icon name="loader" className="spin" /> : <Icon name="applied" />}
           {mode === "signin" ? "Sign in" : "Create account"}
         </button>
+        <div className="auth-divider">or</div>
+        <div id="google-signin-btn" style={{ width: "100%", display: "flex", justifyContent: "center" }}></div>
         <p className="auth-toggle">
           {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
           <button type="button" className="auth-toggle-link" onClick={toggleMode}>

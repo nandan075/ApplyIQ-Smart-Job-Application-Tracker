@@ -9,6 +9,7 @@ import {
   getCurrentUser,
   signIn,
   signUp,
+  signInWithGoogle,
   signOut,
   updateCurrentUser,
   downloadExport,
@@ -238,6 +239,11 @@ export default function App() {
     try { setUser(await signUp(name, email, password)); } catch (err) { setError(err.message); throw err; }
   }
 
+  async function handleGoogleSignIn(credential) {
+    setError("");
+    try { setUser(await signInWithGoogle(credential)); } catch (err) { setError(err.message); throw err; }
+  }
+
   async function handleSignOut() {
     await signOut();
     setUser(null);
@@ -329,7 +335,7 @@ export default function App() {
     <RelevanceChecker selectedApplication={selectedApplication} jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
   if (!authReady) return null;
-  if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} error={error} />;
+  if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} error={error} />;
 
   return (
     <Shell activePage={activePage} setActivePage={setActivePage} openQuickAdd={() => setModalOpen(true)} error={error} clearError={() => setError("")} statusText={statusText} onLogout={handleSignOut}>
