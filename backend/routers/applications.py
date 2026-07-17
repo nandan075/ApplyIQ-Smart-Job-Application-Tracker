@@ -63,11 +63,14 @@ class TailoredDocResponse(TailoredAssets):
 
 
 def application_to_response(application: Application) -> ApplicationResponse:
+    jd_text = application.jd_text
+    if "\n\nJob Key: " in jd_text:
+        jd_text = jd_text.split("\n\nJob Key: ")[0]
     return ApplicationResponse(
         id=application.id,
         company=application.company,
         role=application.role,
-        jd_text=application.jd_text,
+        jd_text=jd_text,
         deadline=application.deadline,
         status=application.status,
         created_at=application.created_at,
@@ -121,15 +124,39 @@ async def create_application(
     company = payload.company.strip() if payload.company else None
     role = payload.role.strip() if payload.role else None
     deadline = payload.deadline
-    jd_text = payload.jd_text.strip()
-    if not jd_text:
+    orig_jd_text = payload.jd_text.strip()
+    if not orig_jd_text:
         raise HTTPException(status_code=422, detail="jd_text cannot be empty.")
 
-    # URL detection
-    is_url = jd_text.startswith("http://") or jd_text.startswith("https://")
+    # Compute stable unique job key
+    import hashlib
+    import re
+    if orig_jd_text.startswith("http://") or orig_jd_text.startswith("https://") or "careers." in orig_jd_text or "jobs." in orig_jd_text or ".com/" in orig_jd_text:
+        cleaned = re.sub(r'^https?://', '', orig_jd_text)
+        cleaned = re.sub(r'^www\.', '', cleaned)
+        cleaned = cleaned.split('?')[0].split('#')[0]
+        job_key = cleaned.rstrip('/')
+    else:
+        hash_input = re.sub(r'\s+', '', orig_jd_text)[:500].lower()
+        job_key = hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
+
+    # Search if there is an existing application for this user with this job key or exact URL/text
+    existing = (
+        await db.execute(
+            select(Application)
+            .where(
+                Application.user_id == user.id,
+                (Application.jd_text == orig_jd_text) | (Application.jd_text.like(f"%Job Key: {job_key}"))
+            )
+        )
+    ).scalars().first()
+
+    # URL detection & text extraction
+    jd_text = orig_jd_text
+    is_url = orig_jd_text.startswith("http://") or orig_jd_text.startswith("https://")
     if is_url:
         try:
-            fetched_text = await asyncio.to_thread(extract_text_from_url, jd_text)
+            fetched_text = await asyncio.to_thread(extract_text_from_url, orig_jd_text)
             if fetched_text and len(fetched_text.strip()) > 50:
                 jd_text = fetched_text
         except Exception:
@@ -148,11 +175,10 @@ async def create_application(
 
     # Fallbacks if extraction failed (e.g. JS-heavy pages returning empty or generic HTML content)
     if not company or not role:
-        orig_text = payload.jd_text.strip()
-        if orig_text.startswith("http://") or orig_text.startswith("https://"):
+        if orig_jd_text.startswith("http://") or orig_jd_text.startswith("https://"):
             from urllib.parse import urlparse, parse_qs
             try:
-                parsed_url = urlparse(orig_text)
+                parsed_url = urlparse(orig_jd_text)
                 
                 # Check for query params indicating the domain/company
                 query_params = parse_qs(parsed_url.query)
@@ -179,12 +205,24 @@ async def create_application(
         if not role:
             role = "Job Position"
 
+    final_jd_text = jd_text + f"\n\nJob Key: {job_key}"
+
+    if existing:
+        existing.company = company or existing.company
+        existing.role = role or existing.role
+        existing.jd_text = final_jd_text
+        if deadline:
+            existing.deadline = deadline
+        existing.created_at = datetime.now()
+        await db.commit()
+        await db.refresh(existing)
+        return application_to_response(existing)
 
     application = Application(
         user_id=user.id,
         company=company,
         role=role,
-        jd_text=jd_text,
+        jd_text=final_jd_text,
         deadline=deadline,
         status="Applied",
     )
@@ -303,7 +341,7 @@ def build_export_markdown(
         doc.cover_letter,
         "",
         "## Job Description",
-        application.jd_text,
+        application.jd_text.split("\n\nJob Key: ")[0] if "\n\nJob Key: " in application.jd_text else application.jd_text,
     ])
     return "\n".join(sections)
 

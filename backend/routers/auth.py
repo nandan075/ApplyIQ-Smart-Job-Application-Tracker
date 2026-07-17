@@ -37,6 +37,11 @@ class ProfileUpdate(BaseModel):
     bio: str = Field(default="", max_length=1000)
 
 
+class PasswordUpdate(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=256)
+
+
 class UserResponse(BaseModel):
     id: UUID
     name: str
@@ -171,4 +176,36 @@ async def google_sign_in(payload: GoogleSignInRequest, request: Request, db: Asy
     request.session["user_id"] = str(user.id)
 
     return user_to_response(user)
+
+
+@router.post("/password", status_code=status.HTTP_200_OK)
+async def update_password(
+    payload: PasswordUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> dict[str, str]:
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Accounts registered via Google Sign-In do not have a password to update."
+        )
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password."
+        )
+    user.password_hash = hash_password(payload.new_password)
+    await db.commit()
+    return {"message": "Password updated successfully."}
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_account(
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> None:
+    await db.delete(user)
+    await db.commit()
+    request.session.clear()
 

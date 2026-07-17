@@ -14,6 +14,8 @@ import {
   updateCurrentUser,
   downloadExport,
   getLatestResume,
+  updatePassword,
+  deleteAccount,
 } from "./api.js";
 import Icon from "./components/Icon.jsx";
 import JDInput from "./components/JDInput.jsx";
@@ -254,6 +256,33 @@ export default function App() {
   async function handleProfileSave(profile) {
     try { setUser(await updateCurrentUser(profile)); setActivePage("profile"); } catch (err) { setError(err.message); throw err; }
   }
+
+  async function handleUpdatePassword(currentPassword, newPassword) {
+    setError("");
+    try {
+      await updatePassword(currentPassword, newPassword);
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setError("");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This will permanently delete all your data, including resumes, applications, and tailored documents. This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteAccount();
+      setUser(null);
+      setApplications([]);
+      setActivePage("dashboard");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
   async function handleUploadResume(file) {
     const resume = await run("upload", () => uploadResume(file));
     setLatestResume(resume);
@@ -330,7 +359,7 @@ export default function App() {
     activePage === "tailoring" ? <TailorWorkspace application={selectedApplication} tailoredDoc={selectedTailoredDoc} loading={pending.tailor} onTailor={handleTailor} onExport={handleExport} score={selectedScore?.relevance_score || 87} /> :
     activePage === "tracker" ? <TrackerBoard applications={applications} scores={scores} loading={pending.initial} pendingStatusId={pending.statusId} onStatusChange={handleStatusChange} setSelectedAppId={setSelectedAppId} setActivePage={setActivePage} /> :
     activePage === "profile" ? <ProfilePage user={user} openSettings={() => setActivePage("settings")} latestResume={latestResume} onUploadResume={handleUploadResume} uploading={pending.upload} /> :
-    activePage === "settings" ? <SettingsPage user={user} onSave={handleProfileSave} /> :
+    activePage === "settings" ? <SettingsPage user={user} onSave={handleProfileSave} onUpdatePassword={handleUpdatePassword} onDeleteAccount={handleDeleteAccount} /> :
     activePage === "help" ? <HelpPage /> :
     <RelevanceChecker selectedApplication={selectedApplication} jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 

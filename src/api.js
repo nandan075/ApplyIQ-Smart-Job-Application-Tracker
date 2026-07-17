@@ -59,3 +59,12 @@ export async function downloadExport(appId, filename) {
   link.click();
   link.parentNode.removeChild(link);
 }
+
+export const updatePassword = (currentPassword, newPassword) =>
+  request("/auth/password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+
+export const deleteAccount = () => request("/auth/me", { method: "DELETE" });

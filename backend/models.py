@@ -23,8 +23,8 @@ class User(Base):
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    resumes: Mapped[list[Resume]] = relationship(back_populates="user")
-    applications: Mapped[list[Application]] = relationship(back_populates="user")
+    resumes: Mapped[list[Resume]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    applications: Mapped[list[Application]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Resume(Base):
@@ -37,7 +37,7 @@ class Resume(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped[User] = relationship(back_populates="resumes")
-    scores: Mapped[list[Score]] = relationship(back_populates="resume")
+    scores: Mapped[list[Score]] = relationship(back_populates="resume", cascade="all, delete-orphan")
 
 
 class Application(Base):
@@ -53,8 +53,8 @@ class Application(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped[User] = relationship(back_populates="applications")
-    score: Mapped[Score | None] = relationship(back_populates="application")
-    tailored_doc: Mapped[TailoredDoc | None] = relationship(back_populates="application")
+    score: Mapped[Score | None] = relationship(back_populates="application", cascade="all, delete-orphan")
+    tailored_doc: Mapped[TailoredDoc | None] = relationship(back_populates="application", cascade="all, delete-orphan")
 
 
 class Score(Base):
