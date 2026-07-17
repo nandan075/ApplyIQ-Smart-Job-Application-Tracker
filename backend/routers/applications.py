@@ -6,7 +6,6 @@ from datetime import date, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from openai import OpenAI, RateLimitError
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.auth import get_current_user
 from backend.database import get_db
 from backend.models import Application, Resume, Score, TailoredDoc, User
-from backend.tailoring import TailoredAssets, tailor_with_openai
+from backend.tailoring import TailoredAssets, tailor_with_gemini
+from backend.url_parser import extract_text_from_url
+from backend.jd_extractor import extract_job_info, ExtractedJobInfo
+from backend.scorer import score_resume_local, ScoreAssets
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -31,21 +33,8 @@ class ApplicationCreate(BaseModel):
     deadline: date | None = None
 
 
-class ExtractedJobInfo(BaseModel):
-    company: str | None = None
-    role: str | None = None
-    deadline: date | None = None
-
-
 class ApplicationStatusUpdate(BaseModel):
     status: str = Field(min_length=1)
-
-
-class ScoreAssets(BaseModel):
-    relevance_score: int = Field(ge=0, le=100)
-    matched_strengths: list[str] = Field(default_factory=list)
-    drawbacks: list[str] = Field(default_factory=list)
-    fix_suggestions: list[str] = Field(default_factory=list)
 
 
 class ScoreResponse(ScoreAssets):
@@ -69,37 +58,6 @@ class TailoredDocResponse(TailoredAssets):
     application_id: UUID
     created_at: datetime
 
-
-def score_with_openai(resume_data: dict, jd_text: str) -> ScoreAssets:
-    client = OpenAI()
-    response = client.beta.chat.completions.parse(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        messages=[
-            {
-                "role": "system",
-                "content": "Score resume fit for the job description. Use only evidence present in the resume JSON.",
-            },
-            {"role": "user", "content": f"Resume JSON:\n{resume_data}\n\nJob description:\n{jd_text[:50000]}"},
-        ],
-        response_format=ScoreAssets,
-    )
-    return response.choices[0].message.parsed
-
-
-def extract_job_info_with_openai(jd_text: str) -> ExtractedJobInfo:
-    client = OpenAI()
-    response = client.beta.chat.completions.parse(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        messages=[
-            {
-                "role": "system",
-                "content": f"{JD_EXTRACTION_PROMPT}\nCurrent date: {date.today().isoformat()}",
-            },
-            {"role": "user", "content": jd_text[:50000]},
-        ],
-        response_format=ExtractedJobInfo,
-    )
-    return response.choices[0].message.parsed
 
 
 
@@ -167,20 +125,60 @@ async def create_application(
     if not jd_text:
         raise HTTPException(status_code=422, detail="jd_text cannot be empty.")
 
+    # URL detection
+    is_url = jd_text.startswith("http://") or jd_text.startswith("https://")
+    if is_url:
+        try:
+            fetched_text = await asyncio.to_thread(extract_text_from_url, jd_text)
+            if fetched_text and len(fetched_text.strip()) > 50:
+                jd_text = fetched_text
+        except Exception:
+            pass # Keep original URL as jd_text if fetching fails
+
     if not company or not role:
         try:
-            extracted = await asyncio.to_thread(extract_job_info_with_openai, jd_text)
-        except RateLimitError as exc:
-            raise HTTPException(status_code=429, detail="OpenAI rate limit reached. Try again later.") from exc
-        except Exception as exc:
-            raise HTTPException(status_code=502, detail="OpenAI job description parsing failed.") from exc
+            extracted = await asyncio.to_thread(extract_job_info, jd_text)
+        except Exception:
+            extracted = None
 
-        company = company or (extracted.company.strip() if extracted.company else None)
-        role = role or (extracted.role.strip() if extracted.role else None)
-        deadline = deadline or extracted.deadline
+        if extracted:
+            company = company or (extracted.company.strip() if extracted.company else None)
+            role = role or (extracted.role.strip() if extracted.role else None)
+            deadline = deadline or extracted.deadline
 
+    # Fallbacks if extraction failed (e.g. JS-heavy pages returning empty or generic HTML content)
     if not company or not role:
-        raise HTTPException(status_code=422, detail="Company and role are required or must be extractable from jd_text.")
+        orig_text = payload.jd_text.strip()
+        if orig_text.startswith("http://") or orig_text.startswith("https://"):
+            from urllib.parse import urlparse, parse_qs
+            try:
+                parsed_url = urlparse(orig_text)
+                
+                # Check for query params indicating the domain/company
+                query_params = parse_qs(parsed_url.query)
+                domain_param = query_params.get("domain")
+                if domain_param:
+                    company_name = domain_param[0].split(".")[0]
+                else:
+                    # Netloc might be microsoft.eightfold.ai or microsoft.com
+                    parts = parsed_url.netloc.split(".")
+                    if len(parts) >= 3 and parts[-2] == "eightfold":
+                        company_name = parts[0]
+                    elif len(parts) >= 2:
+                        company_name = parts[-2]
+                    else:
+                        company_name = parts[0]
+                
+                if not company and company_name:
+                    company = company_name.capitalize()
+            except Exception:
+                pass
+
+        if not company:
+            company = "Company"
+        if not role:
+            role = "Job Position"
+
 
     application = Application(
         user_id=user.id,
@@ -232,11 +230,9 @@ async def score_application(
         raise HTTPException(status_code=404, detail="No resume found for this application user.")
 
     try:
-        assets = await asyncio.to_thread(score_with_openai, resume.structured_data, application.jd_text)
-    except RateLimitError as exc:
-        raise HTTPException(status_code=429, detail="OpenAI rate limit reached. Try again later.") from exc
+        assets = await asyncio.to_thread(score_resume_local, resume.structured_data, application.jd_text)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail="OpenAI scoring failed.") from exc
+        raise HTTPException(status_code=502, detail="Resume scoring failed.") from exc
 
     score_doc = (
         await db.execute(select(Score).where(Score.application_id == application.id))
@@ -357,11 +353,16 @@ async def tailor_application(
         raise HTTPException(status_code=404, detail="No resume found for this application user.")
 
     try:
-        assets = await asyncio.to_thread(tailor_with_openai, resume.structured_data, application.jd_text)
-    except RateLimitError as exc:
-        raise HTTPException(status_code=429, detail="OpenAI rate limit reached. Try again later.") from exc
+        assets = await asyncio.to_thread(tailor_with_gemini, resume.structured_data, application.jd_text)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail="OpenAI document tailoring failed.") from exc
+        err_msg = str(exc)
+        if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "quota" in err_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Gemini API rate limit exceeded. Please wait a few seconds and try again."
+            )
+        raise HTTPException(status_code=502, detail=f"Document tailoring failed: {exc}") from exc
+
 
     doc = (
         await db.execute(select(TailoredDoc).where(TailoredDoc.application_id == application.id))

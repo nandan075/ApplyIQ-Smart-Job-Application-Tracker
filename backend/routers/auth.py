@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 import asyncio
+import httpx
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
@@ -14,6 +15,10 @@ from backend.models import User
 from backend.email_service import send_login_notification
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
+
+
+class GoogleSignInRequest(BaseModel):
+    credential: str
 
 
 class SignInRequest(BaseModel):
@@ -123,3 +128,47 @@ async def update_profile(payload: ProfileUpdate, user: User = Depends(get_curren
 async def list_users(_: User = Depends(require_admin), db: AsyncSession = Depends(get_db)) -> list[UserResponse]:
     users = (await db.execute(select(User).order_by(User.created_at.desc()))).scalars().all()
     return [user_to_response(user) for user in users]
+
+
+@router.post("/google", response_model=UserResponse)
+async def google_sign_in(payload: GoogleSignInRequest, request: Request, db: AsyncSession = Depends(get_db)) -> UserResponse:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"https://oauth2.googleapis.com/tokeninfo?id_token={payload.credential}",
+            timeout=10.0
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google credentials.")
+        id_info = response.json()
+
+    email = id_info.get("email")
+    name = id_info.get("name", "")
+
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google.")
+
+    try:
+        email = normalize_email(email)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
+
+    if not user:
+        user = User(
+            name=name.strip() or email.split("@")[0],
+            email=email,
+            password_hash="",
+            role="user"
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+        asyncio.create_task(send_login_notification(user.email, user.name or user.email))
+
+    request.session.clear()
+    request.session["user_id"] = str(user.id)
+
+    return user_to_response(user)
+

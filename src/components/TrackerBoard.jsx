@@ -59,10 +59,10 @@ function boardFromApplications(applications, scores) {
   return board;
 }
 
-export default function TrackerBoard({ applications = null, scores = {}, onStatusChange, pendingStatusId, loading = false }) {
+export default function TrackerBoard({ applications = null, scores = {}, onStatusChange, pendingStatusId, loading = false, setSelectedAppId, setActivePage }) {
   const [dragging, setDragging] = useState(null);
   const [alertVisible, setAlertVisible] = useState(true);
-  const board = applications?.length ? boardFromApplications(applications, scores) : demoBoard;
+  const board = applications !== null ? boardFromApplications(applications, scores) : demoBoard;
 
   function moveCard(target) {
     if (!dragging || dragging.from === target) return setDragging(null);
@@ -108,6 +108,11 @@ export default function TrackerBoard({ applications = null, scores = {}, onStatu
                   key={card.id}
                   onDragStart={() => setDragging({ id: card.id, from: key })}
                   onDragEnd={() => setDragging(null)}
+                  onClick={() => {
+                    setSelectedAppId?.(card.id);
+                    setActivePage?.("relevance");
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
                   <Icon name={pendingStatusId === card.id ? "loader" : "grip"} className={pendingStatusId === card.id ? "spin" : ""} />
                   <div className="company-logo">{card.company.slice(0, 1)}</div>

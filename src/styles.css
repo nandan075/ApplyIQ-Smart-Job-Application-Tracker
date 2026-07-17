@@ -829,4 +829,25 @@ mark { background: var(--tertiary-fixed); color: var(--on-surface); border-radiu
 .profile-summary p { margin: 4px 0; color: var(--secondary); }
 .profile-initial { width: 72px; height: 72px; flex: 0 0 72px; display: grid; place-items: center; border-radius: 50%; background: var(--secondary-fixed); color: var(--primary); font: 800 28px/1 var(--font-headline); }
 .help-list { max-width: 720px; display: grid; gap: 8px; }
-.help-list p { margin: 0 0 16px; color: var(--secondary); }
+.help-list p { margin: 0 0 16px; color: var(--secondary); }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--secondary);
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--outline-variant);
+}
+.auth-divider:not(:empty)::before {
+  margin-right: .5em;
+}
+.auth-divider:not(:empty)::after {
+  margin-left: .5em;
+}
