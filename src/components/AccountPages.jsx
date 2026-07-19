@@ -3,8 +3,99 @@ import Icon from "./Icon.jsx";
 import ResumeUpload from "./ResumeUpload.jsx";
 
 
-export function SignInPage({ onSignIn, onSignUp, onGoogleSignIn, error }) {
-  const [mode, setMode] = useState("signin");
+const landingFeatures = [
+  {
+    icon: "dashboard",
+    title: "Smart Relevance Score",
+    text: "Analyze how well your resume matches any job description and get clear next steps before you apply.",
+    detail: "88% resume fit",
+  },
+  {
+    icon: "wand",
+    title: "AI Resume Tailoring",
+    text: "Generate role-specific bullets, missing keywords, and cleaner positioning for every application.",
+    detail: "ATS-ready updates",
+  },
+  {
+    icon: "clipboard",
+    title: "Application Tracking",
+    text: "Keep every job, deadline, interview, and follow-up organized in one focused workspace.",
+    detail: "Kanban workflow",
+  },
+];
+
+export function LandingPage({ onSignIn, onGetStarted }) {
+  return (
+    <main className="landing-page">
+      <header className="landing-header">
+        <a className="landing-brand" href="#top" aria-label="ApplyIQ home">
+          <span className="brand-mark">AIQ</span>
+          <span>ApplyIQ</span>
+        </a>
+        <nav className="landing-nav" aria-label="Landing navigation">
+          <a href="#features">Features</a>
+          <button type="button" onClick={onSignIn}>Login</button>
+          <button type="button" className="landing-nav-cta" onClick={onGetStarted}>Get Started</button>
+        </nav>
+      </header>
+
+      <section id="top" className="landing-hero">
+        <div className="landing-hero-copy">
+          <h1>Landing your dream job shouldn't be a full-time job.</h1>
+          <p>AI-powered resume tailoring, relevance scoring, and application tracking to help you get hired faster.</p>
+          <div className="landing-actions">
+            <button type="button" className="gold-button" onClick={onGetStarted}>Get Started for Free</button>
+            <a className="outline-button landing-demo-link" href="#features">View Features</a>
+          </div>
+          <div className="landing-proof">
+            <Icon name="sparkles" />
+            <span>Resume scoring, tailoring, and tracking in one place</span>
+          </div>
+        </div>
+
+        <div className="landing-visual" aria-label="ApplyIQ product preview">
+          <img
+            alt="ApplyIQ dashboard preview with resume score and application tracker"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfiQb5sERazkXeLgBCu-UAUtwyZJiAXh3EgnSXL8b6qwYTLDAkyZJQIXn6EORhb2jz4Wh38glV89HuaG5QxMRVaeQ1cjqcqEw4OChqqCQdFFVzIHWGNWUDAvTjHj9wlyKv921JYNR71-utW6ff9kTCjEw3F8fMadocUp5UAtbhTXhTAZiHjp40D3e4kBZFS9kj73FL2jEmpKV3cABacMIlo8_2rTd1ut3geCq7a6tWkHU_SK0XdBVSlA"
+          />
+          <div className="landing-float">
+            <Icon name="checkCircle" />
+            <div>
+              <strong>Resume tailored</strong>
+              <span>Match score increased to 94%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="landing-features">
+        <div className="landing-section-heading">
+          <h2>The smarter way to manage your search</h2>
+          <p>Everything you need to go from apply to interview with less manual work.</p>
+        </div>
+        <div className="landing-feature-grid">
+          {landingFeatures.map((feature) => (
+            <article className="landing-feature-card" key={feature.title}>
+              <div className="round-icon"><Icon name={feature.icon} /></div>
+              <h3>{feature.title}</h3>
+              <p>{feature.text}</p>
+              <span>{feature.detail}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-cta">
+        <h2>Ready to accelerate your career?</h2>
+        <p>Start tailoring better applications and tracking every opportunity from one workspace.</p>
+        <button type="button" className="gold-button" onClick={onGetStarted}>Sign Up Now</button>
+      </section>
+    </main>
+  );
+}
+
+export function SignInPage({ onSignIn, onSignUp, onGoogleSignIn, error, initialMode = "signin", onBackToLanding }) {
+  const [mode, setMode] = useState(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +119,11 @@ export function SignInPage({ onSignIn, onSignUp, onGoogleSignIn, error }) {
   function toggleMode() {
     setMode(mode === "signin" ? "signup" : "signin");
   }
+
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   useEffect(() => {
     if (window.google) {
@@ -53,6 +149,11 @@ export function SignInPage({ onSignIn, onSignUp, onGoogleSignIn, error }) {
   return (
     <main className="auth-page">
       <form className="auth-form" onSubmit={submit}>
+        {onBackToLanding && (
+          <button type="button" className="auth-back-button" onClick={onBackToLanding}>
+            <Icon name="chevron" /> Back to landing
+          </button>
+        )}
         <div className="brand-block">
           <div className="brand-mark">AIQ</div>
           <div>
@@ -446,9 +547,9 @@ const faqs = [
       <div>
         <p>The Relevance Score measures how closely your resume matches a job description using AI semantic analysis.</p>
         <ul style={{ margin: "8px 0 0", paddingLeft: "16px", listStyleType: "none" }}>
-          <li style={{ marginBottom: "4px" }}>• <strong>90–100%</strong> = Excellent Match</li>
-          <li style={{ marginBottom: "4px" }}>• <strong>75–89%</strong> = Good Match</li>
-          <li style={{ marginBottom: "4px" }}>• <strong>Below 75%</strong> = Resume needs improvement.</li>
+          <li style={{ marginBottom: "4px" }}>â€¢ <strong>90â€“100%</strong> = Excellent Match</li>
+          <li style={{ marginBottom: "4px" }}>â€¢ <strong>75â€“89%</strong> = Good Match</li>
+          <li style={{ marginBottom: "4px" }}>â€¢ <strong>Below 75%</strong> = Resume needs improvement.</li>
         </ul>
       </div>
     )
@@ -475,11 +576,11 @@ const faqs = [
   },
   {
     q: "How do I change my password?",
-    a: <p>Go to Settings → Update Password and follow the instructions.</p>
+    a: <p>Go to Settings â†’ Update Password and follow the instructions.</p>
   },
   {
     q: "How do I delete my account?",
-    a: <p>Go to Settings → Delete Account. This action permanently removes your account and all associated data.</p>
+    a: <p>Go to Settings â†’ Delete Account. This action permanently removes your account and all associated data.</p>
   },
   {
     q: "I found a bug. How can I report it?",

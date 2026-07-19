@@ -23,7 +23,7 @@ import MatchDashboard from "./components/MatchDashboard.jsx";
 import ResumeUpload from "./components/ResumeUpload.jsx";
 import TailorWorkspace from "./components/TailorWorkspace.jsx";
 import TrackerBoard from "./components/TrackerBoard.jsx";
-import { HelpPage, ProfilePage, SettingsPage, SignInPage } from "./components/AccountPages.jsx";
+import { HelpPage, LandingPage, ProfilePage, SettingsPage, SignInPage } from "./components/AccountPages.jsx";
 
 const pages = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" },
@@ -171,6 +171,13 @@ function QuickAddModal({ open, onClose, onSubmit, loading }) {
 }
 
 export default function App() {
+  const initialAuthMode = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const auth = params.get("auth");
+    return auth === "signin" || auth === "signup" ? auth : null;
+  }, []);
+  const [authScreen, setAuthScreen] = useState(initialAuthMode ? "form" : "landing");
+  const [authMode, setAuthMode] = useState(initialAuthMode || "signin");
   const [activePage, setActivePage] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [latestResume, setLatestResume] = useState(null);
@@ -246,11 +253,28 @@ export default function App() {
     try { setUser(await signInWithGoogle(credential)); } catch (err) { setError(err.message); throw err; }
   }
 
+  function openAuth(mode = "signin") {
+    setAuthMode(mode);
+    setAuthScreen("form");
+    const url = new URL(window.location.href);
+    url.searchParams.set("auth", mode);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
+  function showLanding() {
+    setAuthMode("signin");
+    setAuthScreen("landing");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("auth");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
   async function handleSignOut() {
     await signOut();
     setUser(null);
     setApplications([]);
     setActivePage("dashboard");
+    setAuthScreen("landing");
+    setAuthMode("signin");
   }
 
   async function handleProfileSave(profile) {
@@ -364,7 +388,8 @@ export default function App() {
     <RelevanceChecker selectedApplication={selectedApplication} jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
   if (!authReady) return null;
-  if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} error={error} />;
+  if (!user && authScreen === "landing") return <LandingPage onSignIn={() => openAuth("signin")} onGetStarted={() => openAuth("signup")} />;
+  if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} error={error} initialMode={authMode} onBackToLanding={showLanding} />;
 
   return (
     <Shell activePage={activePage} setActivePage={setActivePage} openQuickAdd={() => setModalOpen(true)} error={error} clearError={() => setError("")} statusText={statusText} onLogout={handleSignOut}>
