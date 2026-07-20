@@ -27,14 +27,14 @@ Deadline must be an ISO date (YYYY-MM-DD). Use the current date only to resolve 
 
 
 class ApplicationCreate(BaseModel):
-    jd_text: str = Field(min_length=1)
-    company: str | None = None
-    role: str | None = None
+    jd_text: str = Field(min_length=1, max_length=50_000)
+    company: str | None = Field(default=None, max_length=120)
+    role: str | None = Field(default=None, max_length=120)
     deadline: date | None = None
 
 
 class ApplicationStatusUpdate(BaseModel):
-    status: str = Field(min_length=1)
+    status: str = Field(min_length=1, max_length=40)
 
 
 class ScoreResponse(ScoreAssets):
@@ -399,7 +399,7 @@ async def tailor_application(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Gemini API rate limit exceeded. Please wait a few seconds and try again."
             )
-        raise HTTPException(status_code=502, detail=f"Document tailoring failed: {exc}") from exc
+        raise HTTPException(status_code=502, detail="Document tailoring failed.") from exc
 
 
     doc = (

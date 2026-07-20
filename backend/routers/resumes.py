@@ -18,6 +18,8 @@ from backend.models import Resume, User
 from backend.resume_parser import parse_resume_local
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
+MAX_RESUME_BYTES = 5 * 1024 * 1024
+MAX_RESUME_TEXT_CHARS = 200_000
 
 
 # Local parser used instead of Pydantic models here
@@ -61,7 +63,10 @@ async def create_resume(
     if suffix not in {".pdf", ".docx"}:
         raise HTTPException(status_code=400, detail="Only .pdf and .docx files are supported.")
 
-    data = await file.read()
+    data = await file.read(MAX_RESUME_BYTES + 1)
+    if len(data) > MAX_RESUME_BYTES:
+        raise HTTPException(status_code=413, detail="Resume file is too large.")
+
     try:
         text = extract_pdf_text(data) if suffix == ".pdf" else extract_docx_text(data)
     except Exception as exc:
@@ -69,6 +74,8 @@ async def create_resume(
 
     if not text:
         raise HTTPException(status_code=400, detail="Resume file did not contain readable text.")
+    if len(text) > MAX_RESUME_TEXT_CHARS:
+        raise HTTPException(status_code=413, detail="Resume text is too large.")
 
     try:
         parsed = await asyncio.to_thread(parse_resume_local, text)

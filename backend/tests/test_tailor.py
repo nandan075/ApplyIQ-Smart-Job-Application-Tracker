@@ -5,8 +5,9 @@ import unittest
 from fastapi import HTTPException
 
 from backend.models import Application, Resume, Score, TailoredDoc, User
-from backend.routers import applications
-from backend.tailoring import TAILOR_SYSTEM_PROMPT, TailoredAssets, build_tailor_input
+from backend.routers import applications, auth as auth_router
+from backend.tailoring import TAILOR_SYSTEM_PROMPT, TailoredAssets
+from backend import url_parser
 
 
 class FakeResult:
@@ -60,15 +61,28 @@ class TailoringTests(unittest.TestCase):
         ]:
             self.assertIn(phrase, prompt)
 
-    def test_tailor_input_contains_resume_and_jd(self):
-        messages = build_tailor_input({"skills": [{"skills": ["Python"]}]}, "Need Python and Postgres")
-        self.assertEqual(messages[0]["role"], "system")
-        self.assertIn("Python", messages[1]["content"])
-        self.assertIn("Need Python and Postgres", messages[1]["content"])
-
     def test_tailored_assets_schema(self):
         assets = TailoredAssets(tailored_bullets=["Built APIs with Python."], cover_letter="Dear Hiring Team,")
         self.assertEqual(assets.tailored_bullets[0], "Built APIs with Python.")
+
+
+class AuthSecurityTests(unittest.TestCase):
+    def test_failed_attempts_are_rate_limited(self):
+        key = "test:rate-limit"
+        auth_router._failed_attempts.pop(key, None)
+        for _ in range(auth_router.MAX_FAILED_ATTEMPTS):
+            auth_router._record_failed_attempt(key)
+        with self.assertRaises(HTTPException) as error:
+            auth_router._check_attempts(key)
+        self.assertEqual(error.exception.status_code, 429)
+        auth_router._failed_attempts.pop(key, None)
+
+
+class UrlSecurityTests(unittest.TestCase):
+    def test_private_url_is_rejected(self):
+        for url in ["http://127.0.0.1:8000", "http://10.0.0.1", "http://169.254.169.254/latest"]:
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                url_parser._validate_public_url(url)
 
 
 class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
@@ -96,12 +110,12 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
                 cover_letter="Dear Hiring Team, I built Python APIs relevant to this role.",
             )
 
-        original = applications.tailor_with_openai
-        applications.tailor_with_openai = fake_tailor
+        original = applications.tailor_with_gemini
+        applications.tailor_with_gemini = fake_tailor
         try:
             response = await applications.tailor_application(app_id, db, User(id=user_id, email="test@example.com"))
         finally:
-            applications.tailor_with_openai = original
+            applications.tailor_with_gemini = original
 
         self.assertEqual(calls, [(resume_data, "Need Python API experience.")])
         self.assertEqual(response.application_id, app_id)
@@ -137,12 +151,12 @@ class TailorEndpointTests(unittest.IsolatedAsyncioTestCase):
                 fix_suggestions=["Emphasize API work"],
             )
 
-        original = applications.score_with_openai
-        applications.score_with_openai = fake_score
+        original = applications.score_resume_local
+        applications.score_resume_local = fake_score
         try:
             response = await applications.score_application(app_id, db, User(id=user_id, email="test@example.com"))
         finally:
-            applications.score_with_openai = original
+            applications.score_resume_local = original
 
         self.assertEqual(response.relevance_score, 88)
         self.assertEqual(response.application_id, app_id)

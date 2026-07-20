@@ -10,7 +10,7 @@ load_dotenv(Path(__file__).with_name(".env"))
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/applyiq",
+    "postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/applyiq",
 )
 
 engine = create_async_engine(DATABASE_URL)
