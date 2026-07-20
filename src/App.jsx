@@ -387,6 +387,17 @@ export default function App() {
     activePage === "help" ? <HelpPage /> :
     <RelevanceChecker selectedApplication={selectedApplication} jd={jd} setJd={setJd} onUploadResume={handleUploadResume} onAnalyze={() => analyzeText(jd).catch(() => {})} onTailor={handleTailor} pending={pending} score={selectedScore} />;
 
+  // Fade out and remove the HTML splash loader once auth check finishes
+  useEffect(() => {
+    if (!authReady) return;
+    const loader = document.getElementById("app-loader");
+    if (loader) {
+      loader.style.transition = "opacity 0.4s ease-out";
+      loader.style.opacity = "0";
+      loader.addEventListener("transitionend", () => loader.remove(), { once: true });
+    }
+  }, [authReady]);
+
   if (!authReady) return null;
   if (!user && authScreen === "landing") return <LandingPage onSignIn={() => openAuth("signin")} onGetStarted={() => openAuth("signup")} />;
   if (!user) return <SignInPage onSignIn={handleSignIn} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} error={error} initialMode={authMode} onBackToLanding={showLanding} />;
