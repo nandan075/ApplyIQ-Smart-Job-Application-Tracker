@@ -60,8 +60,9 @@ cp backend\.env.example backend\.env
 Edit `backend\.env`:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/applyiq
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/applyiq
 GEMINI_API_KEY=your_gemini_key_here
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 SESSION_SECRET=replace-with-a-long-random-value
 DEMO_PASSWORD=choose-a-local-demo-password
 COOKIE_SECURE=false
@@ -77,7 +78,7 @@ COOKIE_SECURE=false
 docker compose up -d postgres
 ```
 
-This starts Postgres at `localhost:5432` with user `postgres`, password `postgres`, database `applyiq`.
+This starts Postgres on `127.0.0.1:5432` with local-only demo credentials.
 
 **Option B — Hosted (Supabase):**
 
@@ -240,6 +241,7 @@ docker compose down -v
 When deploying to production:
 - Set `COOKIE_SECURE=true` in `backend\.env`
 - Update CORS origins in `backend/main.py` to include your production domain
+- Set a production `DATABASE_URL`; do not reuse the local Docker credentials
 - Add your production domain to Google OAuth **Authorized JavaScript origins**
 - Use a strong, random `SESSION_SECRET`
 
