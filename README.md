@@ -2,6 +2,12 @@
 
 ApplyIQ is a full-stack job application tracker built with **React (Vite)** and **FastAPI**. It helps job seekers score resume fit against job descriptions, generate AI-tailored resume bullets and cover letters, and track application progress through an interactive Kanban board.
 
+## Hackathon Notes
+
+ApplyIQ was built for the OpenAI Hackathon 2026 with Codex as the primary development partner. Codex helped turn the product idea into a working full-stack app: shaping the React/Vite interface, wiring FastAPI routes, designing the PostgreSQL models and Alembic migrations, tightening auth flows, debugging integration issues, and keeping the README and submission materials aligned with the implementation.
+
+GPT-5.6 was used through Codex for rapid pair-programming, architecture review, UI iteration, backend debugging, and submission copy. The in-app AI features use Gemini for resume tailoring, while GPT-5.6 supported the build process itself: planning, coding, testing, refactoring, and explaining tradeoffs during development.
+
 ## Features
 
 - **Google Sign-In** — One-click authentication via Google OAuth 2.0
